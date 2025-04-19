@@ -16,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="scripter.cpp">
-      <Filter>File di origine</Filter>
+      <Filter>File di risorse</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

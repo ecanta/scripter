@@ -12,9 +12,12 @@ wstring Text;
 vector<wstring> Textlines;
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-size_t Debug(size_t i, size_t left, size_t right)
+size_t Debug(size_t i, size_t left, size_t right, bool off = false)
 {
-	system("cls");
+	if (!off)
+	{
+		system("cls");
+	}
 	for (size_t j = i - left; j < i; ++j)
 	{
 		wcout << Textlines[j] << L'\n';
@@ -29,9 +32,12 @@ size_t Debug(size_t i, size_t left, size_t right)
 	return left + right;
 }
 
-size_t debug(size_t i, size_t left, size_t right)
+size_t debug(size_t i, size_t left, size_t right, bool off = false)
 {
-	system("cls");
+	if (!off)
+	{
+		system("cls");
+	}
 	wcout << Text.substr(i - left, left);
 	SetConsoleTextAttribute(hConsole, 64);
 	wcout << Text.at(i);
@@ -63,12 +69,6 @@ int main()
 	// rimozione spazzatura varia
 	for (long long i = Textlines.size() - 1; i >= 0; --i)
 	{
-		if (i == 11067)
-		{
-			Debug(i, 10, 10);
-			i = i;
-		}
-
 		// riga vuota
 		if (Textlines[i].empty())
 		{
@@ -85,6 +85,7 @@ int main()
 			if (spaces == Textlines[i].size() - 1)
 			{
 				Textlines.erase(Textlines.begin() + i);
+				ContinueLoop = true;
 				break;
 			}
 		}
@@ -286,7 +287,8 @@ int main()
 					break;
 				}
 				indexes.push_back(j);
-			}}
+			}
+			}
 		}
 		for (long long j = indexes.size() - 1; j >= 0; j -= 2)
 		{
@@ -327,7 +329,8 @@ int main()
 					}
 				}
 				indexes.push_back(j);
-			}}
+			}
+			}
 		}
 		for (long long j = indexes.size() - 1; j >= 0; j -= 2)
 		{
@@ -386,7 +389,7 @@ int main()
 			}
 
 			// separazione nome e valore
-			if (Firstspace != wstring::npos)
+			if (Firstspace != Textlines[i].size() - 1)
 			{
 				MacroNames.push_back(Textlines[i].substr(0, Firstspace));
 				MacroValues.push_back(Textlines[i].substr(Firstspace + 1));
@@ -447,8 +450,12 @@ int main()
 			Text.erase(pos, macro.size());
 		}
 	}
+	for (const auto& name : MacroNames)
+	{
+		macros.push_back(name);
+	}
 
-	// separazione argomenti 
+	// separazione argomenti
 	vector<vector<wstring>> args(MacroNames.size());
 	for (size_t i = 0; i < MacroNames.size(); ++i)
 	{
@@ -644,6 +651,10 @@ int main()
 			and (Text.at(i - 1) == L' ' or Text.at(i - 1) == L'\t'))
 		{
 			Text.erase(i, 1);
+			if (Text.at(i - 1) == L'\t')
+			{
+				Text.at(i) == L' ';
+			}
 		}
 	}
 
@@ -661,38 +672,12 @@ int main()
 		}
 	}
 
-	// output iniziale
-	wofstream output("output.txt", ios::trunc);
-	if (!output.is_open())
-	{
-		wcerr << L"Errore nell'apertura del file per la scrittura.\n";
-		return 0;
-	}
-	output << Text;
-	output.close();
-
 	// rimozione del contenuto delle funzioni
 	size_t Index;
 	int location{ OUT__ };
 	int tabs{}, saved{}, balance{};
-
-	////////////////////////////////////////////////////////////////////////////////
-	size_t u{};
-	bool re_id{ false }, slide{ false };
-re_id_loop:
-	if (re_id) goto end_loop;
-	////////////////////////////////////////////////////////////////////////////////
-
 	for (size_t i = 0; i < Text.size(); ++i)
 	{
-		////////////////////////////////////////////////////////////////////////////
-		if (slide) debug(i, min(i, size_t(50)), 100);
-		if (++u == 185774)
-		{
-			u = u;
-		}
-		////////////////////////////////////////////////////////////////////////////
-
 		switch (Text.at(i))
 		{
 		case L'{':
@@ -743,7 +728,7 @@ re_id_loop:
 			{
 				balance--;
 				if (balance == 0)
-				{	
+				{
 					saved = tabs;
 					location = FUNCTION__;
 				}
@@ -759,21 +744,136 @@ re_id_loop:
 		}
 	}
 
-	////////////////////////////////////////////////////////////////////////////////
-	re_id = true;
-	goto re_id_loop;
-end_loop:
-	////////////////////////////////////////////////////////////////////////////////
+	// output iniziale
+	wofstream output("output.txt", ios::trunc);
+	if (!output.is_open())
+	{
+		wcerr << L"Errore nell'apertura del file per la scrittura.\n";
+		return 0;
+	}
+	output << Text;
+	output.close();
 
-	// output finale
+	// output lista delle macro
 	wofstream final_output("hierarchy.txt", ios::trunc);
 	if (!final_output.is_open())
 	{
 		wcerr << L"Errore nell'apertura del secondo file per la scrittura.\n";
 		return 0;
 	}
-	final_output << Text;
-	final_output.close();
+	for (const auto& macro : macros)
+	{
+		final_output << L"MACRO " << macro << L'\n';
+	}
 
+	// tokenizzazione iniziale
+	int ParenthesisBalance{};
+	size_t CharIndex{};
+	Textlines.clear();
+	for (long long i = Text.size() - 1; i > 0; --i)
+	{
+		if (Text.at(i - 1) == L'{' and Text.at(i) == L'}')
+		{
+			Text.insert(Text.begin() + i + 1, L';');
+		}
+	}
+	bool slide = true;
+	for (size_t i = 0; i < Text.size() - 1; ++i)
+	{
+		if (slide and Textlines.size() > 5 and i > 50)
+		{
+			debug(i, 50, 200);
+			wcout << L"\n\n\n";
+			Debug(Textlines.size() - 1, 5, 0, true);
+		}
+		if (Text.at(i) == L';')
+		{
+			Textlines.push_back(Text.substr(CharIndex + 1, i - CharIndex - 1));
+			CharIndex = i;
+			continue;
+		}
+		if (Text.at(i) == L'{' and Text.at(i + 1) != L'}')
+		{
+			Textlines.push_back(Text.substr(CharIndex + 1, i - CharIndex));
+			CharIndex = i;
+		}
+	}
+
+	// miglioramenti della tokenizzazione
+	if (Textlines[0].at(0) != Text.at(0))
+	{
+		Textlines[0] = Text.at(0) + Textlines[0];
+	}
+	for (auto& line : Textlines)
+	{
+		if (line.empty())
+		{
+			continue;
+		}
+		if (line.at(0) == L' ')
+		{
+			line.erase(0, 1);
+			if (line.empty())
+			{
+				continue;
+			}
+		}
+		if (line.at(line.size() - 1) == L' ')
+		{
+			line.erase(line.size() - 1);
+			if (line.empty())
+			{
+				continue;
+			}
+		}
+		if (line.at(line.size() - 1) == L';')
+		{
+			line.erase(line.size() - 1);
+		}
+	}
+	for (long long i = Textlines.size() - 1; i >= 0; --i)
+	{
+		if (Textlines[i].empty() or Textlines[i] == L" ")
+		{
+			Textlines.erase(Textlines.begin() + i);
+		}
+	}
+
+	// ultimi aggiustamenti delle parentesi graffe
+	for (long long i = Textlines.size() - 1; i >= 0; --i)
+	{
+		bool push{ false };
+		if (Textlines[i].size() == 1)
+		{
+			push = Textlines[i] == L"}";
+		}
+		else if (Textlines[i].at(Textlines[i].size() - 1) == L'}' and
+			Textlines[i].at(Textlines[i].size() - 2) != L'{')
+		{
+			push = true;
+		}
+		if (push)
+		{
+			Textlines[i].erase(Textlines[i].size() - 1);
+			Textlines.insert(Textlines.begin() + i + 1, L"}");
+			
+			if (Textlines[i].empty())
+			{
+				continue;
+			}
+			if (Textlines[i].at(Textlines[i].size() - 1) == L' ')
+			{
+				Textlines[i].erase(Textlines[i].size() - 1);
+			}
+		}
+	}
+
+	// output righe
+	final_output << L'\n';
+	for (const auto& line : Textlines)
+	{
+		final_output << line << L'\n';
+	}
+	final_output.close();
 	return 0;
 }
