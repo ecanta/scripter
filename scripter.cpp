@@ -471,7 +471,7 @@ int main()
 		size_t first{}, last{};
 		for (size_t j = 0; j < name.size(); ++j)
 		{
-			if (isalpha(name.at(j)) or isdigit(name.at(j)) or name.at(j) == L'_')
+			if (isalnum(name.at(j)) or name.at(j) == L'_')
 			{
 				last++;
 				continue;
@@ -673,9 +673,10 @@ int main()
 	}
 
 	// rimozione del contenuto delle funzioni
-	size_t Index;
+	bool EraseToCollin{ false };
+	size_t CollinIndex, ResearchIndex, Index;
 	int location{ OUT__ };
-	int tabs{}, saved{}, balance{};
+	int tabs{}, saved{}, balance{}, ConstructorBalance{};
 	for (size_t i = 0; i < Text.size(); ++i)
 	{
 		switch (Text.at(i))
@@ -698,22 +699,49 @@ int main()
 				break;
 			}
 			tabs--;
-			if (location == FUNCTION__ and saved == tabs)
+			if (location == FUNCTION__
+				and saved == tabs and ConstructorBalance == 0)
 			{
 				Text.erase(Index + 1, i - Index - 1);
 				i = Index;
 				location = OUT__;
+
+				if (EraseToCollin)
+				{
+					size_t FirstNotErased;
+					int CollinBalance{ -1 };
+					for (size_t j = i; j > CollinIndex; --j)
+					{
+						switch (j)
+						{
+						case L'{':
+							CollinBalance++;
+							break;
+						case L'}':
+							CollinBalance--;
+							break;
+						}
+						if (CollinBalance == 0)
+						{
+							FirstNotErased = j;
+							break;
+						}
+					}
+					Text.erase(CollinIndex, FirstNotErased - CollinIndex);
+				}
 			}
 			break;
 
 		case L'(':
 			if (location == FUNCTION__)
 			{
+				ConstructorBalance++;
 				break;
 			}
 			if (location == OUT__)
 			{
 				location = RESEARCH__;
+				ResearchIndex = i;
 				balance = 0;
 			}
 			balance++;
@@ -722,6 +750,7 @@ int main()
 		case L')':
 			if (location == FUNCTION__)
 			{
+				ConstructorBalance--;
 				break;
 			}
 			if (location == RESEARCH__)
@@ -731,7 +760,150 @@ int main()
 				{
 					saved = tabs;
 					location = FUNCTION__;
+					ConstructorBalance = 0;
+					auto params{
+						Text.substr(ResearchIndex + 1, i - ResearchIndex - 1)
+					};
+					
+					// funzione senza argomenti
+					if (params.empty())
+					{
+						break;
+					}
+					if (params == L" ")
+					{
+						params.clear();
+						Text.erase(ResearchIndex + 1);
+						i--;
+						break;
+					}
+
+					// rimozione parentesi tonde aggiuntive
+					int ArgBalance{};
+					vector<size_t> ArgIndeces;
+					for (size_t j = 0; j < params.size(); ++j)
+					{
+						switch (params.at(j))
+						{
+						case L'(':
+							if (ArgBalance == 0)
+							{
+								ArgIndeces.push_back(j);
+							}
+							ArgBalance++;
+							break;
+						case L')':
+							ArgBalance--;
+							if (ArgBalance == 0)
+							{
+								ArgIndeces.push_back(j);
+							}
+							break;
+						}
+					}
+					for (long long j = ArgIndeces.size() - 1; j >= 0; j -= 2)
+					{
+						params.erase(
+							ArgIndeces[j - 1],
+							ArgIndeces[j] - ArgIndeces[j - 1] + 1
+						);
+					}
+
+					// rimozione parentesi graffe aggiuntive
+					int TabBalance{};
+					vector<size_t> TabIndeces;
+					for (size_t j = 0; j < params.size(); ++j)
+					{
+						switch (params.at(j))
+						{
+						case L'{':
+							if (TabBalance == 0)
+							{
+								TabIndeces.push_back(j);
+							}
+							TabBalance++;
+							break;
+						case L'}':
+							TabBalance--;
+							if (TabBalance == 0)
+							{
+								TabIndeces.push_back(j);
+							}
+							break;
+						}
+					}
+					for (long long j = TabIndeces.size() - 1; j >= 0; j -= 2)
+					{
+						params.erase(
+							TabIndeces[j - 1],
+							TabIndeces[j] - TabIndeces[j - 1] + 1
+						);
+					}
+
+					// conta delle parole
+					bool IsFunction{ params.find(L',') != wstring::npos };
+					if (!IsFunction)
+					{
+						bool ItsAWord{ false }, stopped{ false };
+						for (size_t j = 0; j < params.size(); ++j)
+						{
+							if (params.at(j) == L'_' or
+								params.at(j) == L'.' or
+								isalnum(params.at(j)))
+							{
+								if (stopped)
+								{
+									IsFunction = true;
+									break;
+								}
+								ItsAWord = true;
+								continue;
+							}
+							stopped = true;
+						}
+					}
+
+					// se è una variabile globale
+					if (!IsFunction)
+					{
+						Text.erase(ResearchIndex + 1, i - ResearchIndex - 1);
+						Text.insert(Text.begin() + ResearchIndex + 1, L'0');
+						i = ResearchIndex + 2;
+						break;
+					}
+
+					// rimozione dei segni di uguaglianza
+					size_t LastComma{ params.size() };
+					for (long long j = LastComma - 1; j >= 0; --j)
+					{
+						switch (params.at(j))
+						{
+						case L',': LastComma = j;
+							break;
+						case L'=':
+							params.erase(j, LastComma - j);
+							while (params.at(--j) == L' ')
+							{
+								params.erase(j, 1);
+							}
+							j++;
+							break;
+						}
+					}
+					
+					// aggiornamento
+					Text =
+						Text.substr(0, ResearchIndex + 1) + params + Text.substr(i);
+					i = ResearchIndex + params.size() + 1;
 				}
+			}
+			break;
+
+		case L':':
+			if (location == RESEARCH__)
+			{
+				EraseToCollin = true;
+				CollinIndex = i;
 			}
 			break;
 
@@ -777,15 +949,8 @@ int main()
 			Text.insert(Text.begin() + i + 1, L';');
 		}
 	}
-	bool slide = true;
 	for (size_t i = 0; i < Text.size() - 1; ++i)
 	{
-		if (slide and Textlines.size() > 5 and i > 50)
-		{
-			debug(i, 50, 200);
-			wcout << L"\n\n\n";
-			Debug(Textlines.size() - 1, 5, 0, true);
-		}
 		if (Text.at(i) == L';')
 		{
 			Textlines.push_back(Text.substr(CharIndex + 1, i - CharIndex - 1));
@@ -866,6 +1031,73 @@ int main()
 				Textlines[i].erase(Textlines[i].size() - 1);
 			}
 		}
+	}
+
+	// rimozione delle inizializzazioni di variabili
+	int Balance;
+	size_t LineIndex;
+	bool balancing{ false };
+	for (size_t i = 0; i < Textlines.size(); ++i)
+	{
+		if (balancing)
+		{
+			for (size_t j = 0; j < Textlines[i].size(); ++j)
+			{
+				switch (Textlines[i].at(j))
+				{
+				case L'{':
+					Balance++;
+					break;
+				case L'}':
+					Balance--;
+					break;
+				}
+			}
+			if (Balance == 0)
+			{
+				balancing = false;
+				for (size_t j = LineIndex; j < i; ++j)
+				{
+					Textlines.erase(Textlines.begin() + LineIndex + 1);
+				}
+				i = LineIndex;
+				Textlines[LineIndex] += L'}';
+			}
+			continue;
+		}
+
+		if (Textlines[i].find(L'(') != wstring::npos or
+			Textlines[i].find(L'=') != wstring::npos or
+			Textlines[i].find(L'}') != wstring::npos or
+			Textlines[i].find(L'{') == wstring::npos)
+		{
+			continue;
+		}
+
+		size_t WordEnd{ Textlines[i].size() - 1 };
+		for (size_t j = 0; j <= WordEnd; ++j)
+		{
+			if (!isalnum(Textlines[i].at(j)) and Textlines[i].at(j) != L'_')
+			{
+				WordEnd = j;
+				break;
+			}
+		}
+
+		auto Word{ Textlines[i].substr(0, WordEnd) };
+		if (Word == L"template" or Word == L"class" or Word == L"struct" or
+			Word == L"enum" or Word == L"union")
+		{
+			continue;
+		}
+		if (Word == L"using")
+		{
+			Textlines.erase(Textlines.begin() + i--);
+			continue;
+		}
+		balancing = true;
+		LineIndex = i;
+		Balance = 1;
 	}
 
 	// output righe
