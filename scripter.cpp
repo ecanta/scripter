@@ -12,6 +12,7 @@ wstring Text;
 vector<wstring> Textlines;
 HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
+// funzione per visualizzare le righe del testo
 size_t Debug(size_t i, size_t left, size_t right, bool off = false)
 {
 	if (!off)
@@ -32,6 +33,7 @@ size_t Debug(size_t i, size_t left, size_t right, bool off = false)
 	return left + right;
 }
 
+// funzione per visualizzare il testo
 size_t debug(size_t i, size_t left, size_t right, bool off = false)
 {
 	if (!off)
@@ -135,6 +137,7 @@ int main()
 		int quotation_marks{}, apostrophes{};
 		for (size_t j = 0; j < Textlines[i].size(); ++j)
 		{
+			// conta delle virgolette
 			switch (Textlines[i].at(j))
 			{
 			case L'\"': {
@@ -163,6 +166,7 @@ int main()
 				break;
 			}
 
+			// conta degli apostrofi
 			case L'\'': {
 				bool escaped{ false };
 				if (j > 0)
@@ -188,8 +192,10 @@ int main()
 				}
 				break;
 			}
-
+			
+			// azioni sui commenti
 			case L'/':
+				// controlli di sicurezza
 				if (remove)
 				{
 					break;
@@ -226,12 +232,10 @@ int main()
 				{
 					break;
 				}
-
 				if (j + 1 >= Textlines[i].size())
 				{
 					break;
 				}
-
 				if (Textlines[i].at(j + 1) == L'/')
 				{
 					remove = false;
@@ -243,6 +247,8 @@ int main()
 			}
 		}
 	}
+
+	// rimozione delle parti segnalate
 	for (size_t i = 0; i < i1.size(); ++i)
 	{
 		if (i2[i] == i1[i])
@@ -262,6 +268,7 @@ int main()
 	// rimozione testo
 	for (long long i = Textlines.size() - 1; i >= 0; --i)
 	{
+		// rimozione virgolette
 		vector<long long> indexes;
 		for (size_t j = 0; j < Textlines[i].size(); ++j)
 		{
@@ -455,10 +462,11 @@ int main()
 		macros.push_back(name);
 	}
 
-	// separazione argomenti
+	// separazione argomenti per le macro definite
 	vector<vector<wstring>> args(MacroNames.size());
 	for (size_t i = 0; i < MacroNames.size(); ++i)
 	{
+		// ricerca nomi
 		auto pos{ MacroNames[i].find(L'(') };
 		if (pos == wstring::npos)
 		{
@@ -468,6 +476,7 @@ int main()
 			MacroNames[i].substr(pos + 1, MacroNames[i].find(L')') - pos - 1)
 		};
 
+		// separazione parole
 		size_t first{}, last{};
 		for (size_t j = 0; j < name.size(); ++j)
 		{
@@ -492,7 +501,7 @@ int main()
 		MacroNames[i].erase(pos);
 	}
 
-	// riorganizzazione valori
+	// riorganizzazione valori per le macro più complesse
 	vector<vector<size_t>> indeces(MacroValues.size());
 	vector<vector<wstring>> concats;
 	for (size_t i = 0; i < MacroValues.size(); ++i)
@@ -500,6 +509,7 @@ int main()
 		concats.push_back({ MacroValues[i] });
 		for (size_t j = 0; j < args[i].size(); ++j)
 		{
+			// sostituzione dei parametri nella definizione
 			bool finished{ true };
 			for (size_t k = 0; k < concats[i].size(); ++k)
 			{
@@ -625,6 +635,7 @@ int main()
 	{
 		if (Text.at(i) == L'\n')
 		{
+			// rimozione dei pragma sfuggiti alle rimozioni precedenti
 			size_t pos{};
 			if ((pos = Text.substr(i, LastNotOf).find(L"__pragma", pos))
 				!= wstring::npos)
@@ -634,6 +645,7 @@ int main()
 				continue;
 			}
 
+			// eliminazione spazi aggiuntivi
 			int spaces{};
 			for (; Text.at(i - spaces) == L' ' or Text.at(i - spaces) == L'\t';
 				--spaces);
@@ -641,10 +653,8 @@ int main()
 			LastNotOf = i;
 		}
 	}
-	while (Text.at(0) == L' ' or Text.at(0) == L'\t' or Text.at(0) == L'\n')
-	{
-		Text.erase(0, 1);
-	}
+
+	// sostituzione delle tabulazioni con spazi semplici
 	for (long long i = Text.size() - 1; i > 0; --i)
 	{
 		if ((Text.at(i) == L' ' or Text.at(i) == L'\t')
@@ -653,12 +663,12 @@ int main()
 			Text.erase(i, 1);
 			if (Text.at(i - 1) == L'\t')
 			{
-				Text.at(i) == L' ';
+				Text.at(i) = L' ';
 			}
 		}
 	}
 
-	// unificazione su una riga
+	// rimozione di tutti i caratteri di nuova linea
 	for (long long i = Text.size() - 1; i > 0; --i)
 	{
 		if (Text.at(i) == L'\n')
@@ -672,7 +682,7 @@ int main()
 		}
 	}
 
-	// rimozione del contenuto delle funzioni
+	// rimozione della maggiorparte del codice inutile
 	bool EraseToCollin{ false };
 	size_t CollinIndex, ResearchIndex, Index;
 	int location{ OUT__ };
@@ -686,11 +696,14 @@ int main()
 			{
 				break;
 			}
+
+			// indice di inizio rimozione del codice in una funzione
 			if (location == FUNCTION__ and saved == tabs)
 			{
 				Index = i;
 			}
 			tabs++;
+			
 			break;
 
 		case L'}':
@@ -699,20 +712,27 @@ int main()
 				break;
 			}
 			tabs--;
+
+			// spostamento fuori dalla funzione
 			if (location == FUNCTION__
 				and saved == tabs and ConstructorBalance == 0)
 			{
+				// rimozione codice interno
 				Text.erase(Index + 1, i - Index - 1);
-				i = Index;
+				i = Index + 1;
 				location = OUT__;
 
+				// rimozione copie nei costruttori in una classe
 				if (EraseToCollin)
 				{
 					size_t FirstNotErased;
 					int CollinBalance{ -1 };
-					for (size_t j = i; j > CollinIndex; --j)
+					EraseToCollin = false;
+
+					// bilancio delle parentesi per trovare la fine della rimozione
+					for (size_t j = i - 1; j > CollinIndex; --j)
 					{
-						switch (j)
+						switch (Text.at(j))
 						{
 						case L'{':
 							CollinBalance++;
@@ -727,7 +747,10 @@ int main()
 							break;
 						}
 					}
+
+					// eliminazione
 					Text.erase(CollinIndex, FirstNotErased - CollinIndex);
+					i = CollinIndex + 1;
 				}
 			}
 			break;
@@ -738,6 +761,8 @@ int main()
 				ConstructorBalance++;
 				break;
 			}
+
+			// inizio ricerca parentesi
 			if (location == OUT__)
 			{
 				location = RESEARCH__;
@@ -745,6 +770,7 @@ int main()
 				balance = 0;
 			}
 			balance++;
+			
 			break;
 
 		case L')':
@@ -753,11 +779,15 @@ int main()
 				ConstructorBalance--;
 				break;
 			}
+
 			if (location == RESEARCH__)
 			{
 				balance--;
+
+				// fine ricerca parentesi
 				if (balance == 0)
 				{
+					// determinazione se funzione o se variabile globale
 					saved = tabs;
 					location = FUNCTION__;
 					ConstructorBalance = 0;
@@ -899,14 +929,17 @@ int main()
 			}
 			break;
 
+			// segnalazione dell'esistenza di un costruttore con copie
 		case L':':
-			if (location == RESEARCH__)
+			if (location == FUNCTION__
+				and saved == tabs and ConstructorBalance == 0)
 			{
 				EraseToCollin = true;
 				CollinIndex = i;
 			}
 			break;
 
+			// spostamento prematuro al di fuori della funzione
 		case L';':
 			if (location == FUNCTION__ and saved == tabs)
 			{
@@ -916,7 +949,7 @@ int main()
 		}
 	}
 
-	// output iniziale
+	// output sul file iniziale
 	wofstream output("output.txt", ios::trunc);
 	if (!output.is_open())
 	{
@@ -944,6 +977,7 @@ int main()
 	Textlines.clear();
 	for (long long i = Text.size() - 1; i > 0; --i)
 	{
+		// per andare a capo dopo una funzione
 		if (Text.at(i - 1) == L'{' and Text.at(i) == L'}')
 		{
 			Text.insert(Text.begin() + i + 1, L';');
@@ -951,12 +985,15 @@ int main()
 	}
 	for (size_t i = 0; i < Text.size() - 1; ++i)
 	{
+		// separazione righe in base ai punti e virgola
 		if (Text.at(i) == L';')
 		{
 			Textlines.push_back(Text.substr(CharIndex + 1, i - CharIndex - 1));
 			CharIndex = i;
 			continue;
 		}
+
+		// apertura parentesi graffe
 		if (Text.at(i) == L'{' and Text.at(i + 1) != L'}')
 		{
 			Textlines.push_back(Text.substr(CharIndex + 1, i - CharIndex));
@@ -996,6 +1033,8 @@ int main()
 			line.erase(line.size() - 1);
 		}
 	}
+
+	// eliminazione di alcune righe vuote
 	for (long long i = Textlines.size() - 1; i >= 0; --i)
 	{
 		if (Textlines[i].empty() or Textlines[i] == L" ")
@@ -1004,9 +1043,136 @@ int main()
 		}
 	}
 
-	// ultimi aggiustamenti delle parentesi graffe
+	// separazione delle dichiarazioni di più variabili in una singola istruzione
+	for (size_t i = 0; i < Textlines.size(); ++i)
+	{
+		// ricerca di una virgola a bilancio
+		int balance1{}, balance2{};
+		for (size_t j = 0; j < Textlines[i].size(); ++j)
+		{
+			switch (Textlines[i].at(j))
+			{
+				case L'(':
+					balance1++;
+					break;
+				case L')':
+					balance1--;
+					break;
+				case L'{':
+					balance2++;
+					break;
+				case L'}':
+					balance2--;
+					break;
+				case L',':
+					if (balance1 != 0 or balance2 != 0 or
+						Textlines[i].substr(0, 5) == L"using")
+					{
+						break;
+					}
+					wstring datatype;
+					vector<size_t> CommaLines, CommaIndeces;
+
+					// ricerca di un inizio riga a bilancio
+					bool Break{ false };
+					long long rindex = j;
+					for (long long k = i; k >= 0; --k)
+					{
+						for (;; --rindex)
+						{
+							// modifiche al bilanciamento
+							switch (Textlines[k].at(rindex))
+							{
+							case L'(':
+								balance1--;
+								break;
+							case L')':
+								balance1++;
+								break;
+							case L'{':
+								balance2--;
+								break;
+							case L'}':
+								balance2++;
+								break;
+							case L',':
+								if (Textlines[i].substr(0, 5) == L"using")
+								{
+									break;
+								}
+								CommaLines.push_back(k);
+								CommaIndeces.push_back(rindex);
+								break;
+							}
+
+							// inizio della riga
+							if (rindex == 0)
+							{
+								if (balance1 != 0 or balance2 != 0)
+								{
+									break;
+								}
+
+								// calcolo del datatype
+								datatype = Textlines[k];
+								for (size_t l = 0; l < Textlines[l].size(); ++l)
+								{
+									if (!isalnum(Textlines[k].at(l)) and
+										Textlines[k].at(l) != L'_' and
+										Textlines[k].at(l) != L' ')
+									{
+										datatype.erase(l);
+										break;
+									}
+								}
+
+								// rimozione del nome della variabile
+								for (long long l = datatype.size() - 1; l >= 0; --l)
+								{
+									if (!isalnum(datatype.at(l)) and
+										datatype.at(l) != L'_')
+									{
+										datatype.erase(l);
+										break;
+									}
+								}
+								Break = true;
+								break;
+							}
+						}
+
+						// uscita
+						if (Break)
+						{
+							break;
+						}
+
+						// nuovo giro del loop
+						if (k > 0)
+						{
+							rindex = Textlines[k - 1].size() - 1;
+						}
+					}
+
+					// finire qui il codice
+					// ...
+			}
+		}
+	}
+
+	// output righe
+	final_output << L'\n';
+	for (const auto& line : Textlines)
+	{
+		final_output << line << L'\n';
+	}
+	final_output.close();
+	return 0;
+
+	// spostamento a capo di una parentesi graffa chiusa
 	for (long long i = Textlines.size() - 1; i >= 0; --i)
 	{
+		// per capire se l'azione è necessaria
 		bool push{ false };
 		if (Textlines[i].size() == 1)
 		{
@@ -1017,6 +1183,8 @@ int main()
 		{
 			push = true;
 		}
+		
+		// esecuzione
 		if (push)
 		{
 			Textlines[i].erase(Textlines[i].size() - 1);
@@ -1033,14 +1201,21 @@ int main()
 		}
 	}
 
-	// rimozione delle inizializzazioni di variabili
+	// rimozione dell'inizializzazione uniforme
 	int Balance;
 	size_t LineIndex;
 	bool balancing{ false };
 	for (size_t i = 0; i < Textlines.size(); ++i)
 	{
+		if (Textlines[i].empty())
+		{
+			Textlines.erase(Textlines.begin() + i--);
+		}
+
+		// scorrimento righe
 		if (balancing)
 		{
+			// bilancio necessario per eliminare
 			for (size_t j = 0; j < Textlines[i].size(); ++j)
 			{
 				switch (Textlines[i].at(j))
@@ -1053,6 +1228,8 @@ int main()
 					break;
 				}
 			}
+
+			// eliminazione del contenuto delle parentesi graffe
 			if (Balance == 0)
 			{
 				balancing = false;
@@ -1066,14 +1243,8 @@ int main()
 			continue;
 		}
 
-		if (Textlines[i].find(L'(') != wstring::npos or
-			Textlines[i].find(L'=') != wstring::npos or
-			Textlines[i].find(L'}') != wstring::npos or
-			Textlines[i].find(L'{') == wstring::npos)
-		{
-			continue;
-		}
-
+		// calcolo prima parola in un'istruzione
+	WordConstruction:
 		size_t WordEnd{ Textlines[i].size() - 1 };
 		for (size_t j = 0; j <= WordEnd; ++j)
 		{
@@ -1083,29 +1254,50 @@ int main()
 				break;
 			}
 		}
-
 		auto Word{ Textlines[i].substr(0, WordEnd) };
+
+		// keyword importanti in c++
 		if (Word == L"template" or Word == L"class" or Word == L"struct" or
-			Word == L"enum" or Word == L"union")
+			Word == L"enum" or Word == L"union" or Word == L"namespace")
 		{
 			continue;
 		}
+
+		// rimozione degli alias
 		if (Word == L"using")
 		{
 			Textlines.erase(Textlines.begin() + i--);
 			continue;
 		}
+
+		// rimozione degli specificatori di accesso
+		if (Word == L"public" or Word == L"private" or Word == L"protected")
+		{
+			Textlines[i].erase(0, Word.size() + 1);
+			if (Textlines[i].at(0) == L' ')
+			{
+				Textlines[i].erase(0, 1);
+			}
+			if (Textlines[i].empty())
+			{
+				continue;
+			}
+			goto WordConstruction;
+		}
+
+		// filtro contenuti della riga
+		if (Textlines[i].find(L'(') != wstring::npos or
+			Textlines[i].find(L'=') != wstring::npos or
+			Textlines[i].find(L'}') != wstring::npos or
+			Textlines[i].find(L'{') == wstring::npos)
+		{
+			continue;
+		}
+
+		// istruzioni di eliminare
 		balancing = true;
 		LineIndex = i;
 		Balance = 1;
 	}
 
-	// output righe
-	final_output << L'\n';
-	for (const auto& line : Textlines)
-	{
-		final_output << line << L'\n';
-	}
-	final_output.close();
-	return 0;
 }
