@@ -39,8 +39,9 @@ Non è necessario alcun compilatore specifico (a parte quello per compilare ques
 13) Rimozione dell’inizializzazione uniforme (`{}`).
 14) Rimozione dei nomi dei parametri nelle funzioni.
 15) Rimozione delle funzioni senza codice.
-16) Espansione delle virgole negli elenchi.
-17) Aggiunta dell'indentazione e interpretazione di ogni riga
+16) Espansione delle virgole nelle enumerazioni.
+17) Riformattazioni delle funzioni template e delle classi template.
+18) Aggiunta dell'indentazione e interpretazione di ogni riga.
 
 <h2>Limitazioni</h2>
 

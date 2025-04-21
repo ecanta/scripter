@@ -1115,7 +1115,6 @@ int main()
 	int balance1{}, balance2{}, balance3{};
 	for (size_t i = 0; i < Textlines.size(); ++i)
 	{
-		//Debug(i, min(int(i), 10), 10);
 		for (size_t j = 0; j < Textlines[i].size(); ++j)
 		{
 			switch (Textlines[i].at(j))
@@ -1496,12 +1495,240 @@ int main()
 		}
 	}
 
-	// eliminazione delle virgole a bilancio
+	// espansione degli elementi in un'enumerazione
+	bool Enumerating{ false };
+	for (size_t i = 0; i < Textlines.size(); ++i)
+	{
+		// fine del ritaglio
+		if (Textlines[i] == L"}" and Enumerating)
+		{
+			Enumerating = false;
+		}
+		if (Textlines[i].size() < 4)
+		{
+			continue;
+		}
 
-	// aggiunta dell'indentazione
+		// inizio del ritaglio
+		if (Textlines[i].substr(0, 4) == L"enum")
+		{
+			Enumerating = true;
+			continue;
+		}
 
-	// output righe
-	final_output << L'\n';
+		// ritaglio ed espansione
+		if (Enumerating)
+		{
+			auto pos{ Textlines[i].find(L',') };
+			if (pos == wstring::npos)
+			{
+				Enumerating = false;
+				continue;
+			}
+
+			// costruzione nuova riga
+			auto NewLineToWrite{ Textlines[i].substr(pos + 1) };
+			if (NewLineToWrite.empty() or NewLineToWrite == L" ")
+			{
+				Textlines[i].erase(Textlines[i].size() - 1);		
+				continue;
+			}
+
+			// scrittura di una nuova riga
+			if (NewLineToWrite.at(0) == L' ')
+			{
+				NewLineToWrite.erase(0, 1);
+			}
+			Textlines.insert(Textlines.begin() + i + 1, NewLineToWrite);
+			Textlines[i].erase(pos);
+		}
+	}
+
+	// rimozione dei keyword di template
+	for (size_t i = 0; i < Textlines.size(); ++i)
+	{
+		if (Textlines[i].size() < 8)
+		{
+			continue;
+		}
+		if (Textlines[i].substr(0, 8) != L"template")
+		{
+			continue;
+		}
+
+		// ricerca del keyword typename o class
+		auto TypenameIndex{ Textlines[i].find(L"typename") };
+		if (TypenameIndex == wstring::npos)
+		{
+			TypenameIndex = Textlines[i].find(L"class") + 5;
+		}
+		else
+		{
+			TypenameIndex += 8;
+		}
+
+		// calcolo del nome del typename
+		while (Textlines[i].at(TypenameIndex) == L' ')
+		{
+			TypenameIndex++;
+		}
+		size_t EndIndex{ TypenameIndex + 1 };
+		for (;;)
+		{
+			if (Textlines[i].at(EndIndex) == L' ' or
+				Textlines[i].at(EndIndex) == L'>')
+			{
+				break;
+			}
+			++EndIndex;
+		}
+		auto TpName{ Textlines[i].substr(TypenameIndex, EndIndex - TypenameIndex) };
+		
+		// rimozione della dichiarazione di template
+		Textlines[i].erase(0, Textlines[i].find(L'>') + 1);
+		if (Textlines[i].at(0) == L' ')
+		{
+			Textlines[i].erase(0, 1);
+		}
+
+		// se la classe è derivata
+		long long DerivationIndex{ -1 };
+		for (size_t j = 0; j < Textlines[i].size() - 1; ++j)
+		{
+			if (Textlines[i].at(j) == L':' and Textlines[i].at(j + 1) != L':')
+			{
+				DerivationIndex = j;
+				break;
+			}
+		}
+		if (DerivationIndex > 0)
+		{
+			Textlines[i].erase(
+				DerivationIndex,
+				Textlines[i].size() - DerivationIndex - 1
+			);
+		}
+
+		// se il template è specificato
+		size_t TpNameIndexing{ Textlines[i].find(L'<' + TpName + L'>') };
+		if (TpNameIndexing != wstring::npos)
+		{
+			TpNameIndexing += TpName.size() + 2;
+			while (Textlines[i].at(TpNameIndexing) == L' ')
+			{
+				TpNameIndexing++;
+			}
+			if (Textlines[i].at(TpNameIndexing) == L'(')
+			{
+				continue;
+			}
+		}
+
+		// ricerca del nome della funzione
+		auto Char{ Textlines[i].find(L'(') };
+		if (Char == wstring::npos)
+		{
+			Char = Textlines[i].size() - 1;
+		}
+		auto EndOfLine{ Textlines[i].substr(Char) };
+		Textlines[i].erase(Char);
+		
+		// operazioni finali
+		auto IndexOfSupposedSpace{ Textlines[i].size() - 1 };
+		Textlines[i] += L'<' + TpName + L'>' + EndOfLine;
+		if (Textlines[i].at(IndexOfSupposedSpace) == L' ')
+		{
+			Textlines[i].erase(IndexOfSupposedSpace, 1);
+		}
+	}
+
+	// traduzione riga per riga
+	int IndentationTabs{};
+	for (auto& Line : Textlines)
+	{
+		final_output << wstring(max(0, IndentationTabs), L'\t');
+
+		// parentesi
+		if (Line == L"}")
+		{
+			final_output << L'\n';
+			IndentationTabs--;
+			continue;
+		}
+
+		// namespace
+		if (Line.size() >= 9)
+		{
+			if (Line.substr(0, 9) == L"namespace")
+			{
+				final_output << L"NAMESPACE  ";
+				Line.erase(0, 9);
+				if (Line.at(0) == L' ')
+				{
+					Line.erase(0, 1);
+				}
+
+				auto FirstSpace{ Line.find(L' ') };
+				if (FirstSpace != wstring::npos)
+				{
+					Line.erase(FirstSpace);
+				}
+
+				final_output << Line << L":\n";
+				IndentationTabs++;
+				continue;
+			}
+		}
+
+		// enum
+		if (Line.size() >= 4)
+		{
+			if (Line.substr(0, 4) == L"enum")
+			{
+				final_output << L"ENUM ";
+				Line.erase(0, 4);
+				if (Line.at(0) == L' ')
+				{
+					Line.erase(0, 1);
+				}
+
+				// enum class
+				if (Line.size() >= 5)
+				{
+					if (Line.substr(0, 5) == L"class")
+					{
+						final_output << L"CLASS  ";
+						Line.erase(0, 5);
+						if (Line.at(0) == L' ')
+						{
+							Line.erase(0, 1);
+						}
+					}
+					else
+					{
+						final_output << L' ';
+					}
+				}
+				else
+				{
+					final_output << L' ';
+				}
+
+				auto FirstSpace{ Line.find(L' ') };
+				if (FirstSpace != wstring::npos)
+				{
+					Line.erase(FirstSpace);
+				}
+
+				final_output << Line << L":\n";
+				IndentationTabs++;
+				continue;
+			}
+		}
+	}
+
+	// output righe (questa parte serve solo per il debug)
+	final_output << L"\n@@@@@\n@@@@@\n@@@@@\n\n\n";
 	for (const auto& Line : Textlines)
 	{
 		final_output << Line << L'\n';
