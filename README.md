@@ -37,7 +37,10 @@ Non è necessario alcun compilatore specifico (a parte quello per compilare ques
 11) Tokenizzazione del testo su `;` e `{}`.
 12) Espansione delle inizializzazioni multiple su una riga singola.
 13) Rimozione dell’inizializzazione uniforme (`{}`).
-14) *(In fase di sviluppo: ulteriori analisi e raffinamenti)*
+14) Rimozione dei nomi dei parametri nelle funzioni.
+15) Rimozione delle funzioni senza codice.
+16) Espansione delle virgole negli elenchi.
+17) Aggiunta dell'indentazione e interpretazione di ogni riga
 
 <h2>Limitazioni</h2>
 
