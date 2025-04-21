@@ -1,0 +1,629 @@
+MACRO  HIDECURSOR
+MACRO  _USE_MATH_DEFINES
+MACRO  WIN32_LEAN_AND_MEAN
+MACRO  NOMINMAX
+MACRO  BUGS
+MACRO  Y2D(X, Y, Z)
+MACRO  X2D(X, Y, Z)
+MACRO  FUNCTION_LABEL
+MACRO  FUNCTION_DERIVATIVE
+MACRO  FUNCTION_REMOVE
+MACRO  MORE_EQUAL_THAN
+MACRO  MORE_THAN
+MACRO  LESS_EQUAL_THAN
+MACRO  LESS_THAN
+MACRO  BOOLALPHACHANGED
+MACRO  CHANGEDVALUE
+MACRO  GRAPHED
+MACRO  stddef
+MACRO  _SQ(x)
+MACRO  Last(x)
+MACRO  cstr(x)
+MACRO  issign(x)
+MACRO  integer(x)
+MACRO  DECLARE_TIME_POINT(x)
+MACRO  VXconverter(func, param)
+MACRO  V1converter(func, param)
+MACRO  ResetAttribute()
+MACRO  _GetCursorPos()
+MACRO  ret
+MACRO  NEG
+MACRO  POS
+MACRO  HIDECURSOR
+MACRO  IMPROVE
+MACRO  UNOPT
+MACRO  OPT
+MACRO  RUIN
+
+int __NULL__
+HANDLE hConsole
+HANDLE hConsoleInput
+CONSOLE_CURSOR_INFO cursorInfo
+CONSOLE_CURSOR_INFO cursor
+CONSOLE_SCREEN_BUFFER_INFO csbi
+static wchar_t charVariable
+ptrdiff_t GlobalMax
+const ptrdiff_t GLOBAL_CAP
+bool BOOLALPHA
+bool PRINTN
+double CORRECTION_RATIO
+atomic_bool GlobalInterr
+atomic_bool interrupted
+atomic_bool computing
+atomic_bool IsDone
+atomic_bool RunMonitor
+condition_variable cv
+condition_variable Cv
+condition_variable MonitorCV
+mutex CoutMutex
+mutex mtx
+mutex MonitorMTX
+COORD Min
+LARGE_INTEGER ProgramFrequency
+struct compost {
+ptrdiff_t factors
+int exp
+}
+struct divisor {
+ptrdiff_t DivNumber
+ptrdiff_t DivSum
+ptrdiff_t DivProduct
+wstring Div_pr
+}
+struct digitRatio {
+int digitSumRatioNum
+int digitSumRatioDen
+int digitProductRatioNum
+int digitProductRatioDen
+}
+digitRatio items
+struct coord {
+double X
+double Y
+coord() {}
+coord(double, double) {}
+coord(COORD) {}
+operator COORD() const {}
+}
+enum switchcase {
+DoSimpleCode , DoComplexCode , DoSimpleFactor , DoComplexFactor , DoCodeFactor , DoAll , DebugSimpleCode , DebugComplexCode , DebugSimpleFactor , DebugComplexFactor , DebugCodeFactor , DebugAll , DebugDigits , DebugDigitsAndCode , DebugDigitsAndFactor, DebugComplete , ConvertCodeInverse , SeriesExpansion , FactorPolynomial , FractElaborator , FactorMatrix , Random , NotAssigned
+}
+switchcase usefree
+unordered_map<wstring, switchcase> stringToEnumMap 
+unordered_map<switchcase, wstring> enumToStringMap 
+unordered_map<wstring, wstring> ConvertFromSuperScript 
+wstring Variables
+template<typename T> static bool Smaller(const T&, const T&) {}
+template<typename T> static ptrdiff_t BinarySearch(const tensor<T>&, const T) {}
+template<typename Ty> class complex {
+Ty RealPart
+Ty ImaginaryPart
+Ty norm() const {}
+complex() {}
+complex(Ty) {}
+complex(Ty, Ty) {}
+inline complex conjugate() const {}
+inline complex opposite() const {}
+complex operator+(complex) const {}
+inline complex& operator+=(complex) {}
+inline complex& operator++() {}
+inline complex& operator++ 
+complex operator-(complex) const {}
+inline complex& operator-=(complex) {}
+inline complex& operator--() {}
+inline complex& operator-- 
+complex operator*(complex) const {}
+inline complex& operator*=(complex) {}
+complex operator/(complex) const {}
+inline complex operator/=(complex) {}
+wstring str() const {}
+friend wostream& operator<<(wostream&, const complex&) {}
+}
+template<typename Ty> static complex<Ty> InitExponentialForm(Ty, Ty) {}
+tensor<complex<long double>> Omega
+static void FFT(tensor<complex<long double>>&, bool) {}
+class big {
+tensor<int> Integer
+bool sign
+long double decimal
+void construct(ptrdiff_t) {}
+bool compare(const big&, const big&) const {}
+big Add(const big&, const big&, bool) const {}
+big Sub(const big&, const big&, bool) const {}
+big AlgebricOperation1(const big&, const big&, bool) const {}
+big FFT_Multiplication(const big&) const {}
+template<typename t> t Number() {}
+big() {}
+big(int) {}
+big(ptrdiff_t) {}
+big(double) {}
+big(long double) {}
+big(tensor<int>) {}
+big(wstring) {}
+big& operator=(const big&) {}
+inline bool operator==(const big&) const {}
+inline bool operator!=(const big&) const {}
+bool operator<(const big&) const {}
+inline bool operator<=(const big&) const {}
+inline bool operator>=(const big&) const {}
+inline bool operator>(const big&) const {}
+big operator+(const big&) const {}
+inline big& operator+=(const big&) {}
+inline big& operator++() {}
+inline big& operator++ 
+big operator-(const big&) const {}
+inline big& operator-=(const big&) {}
+inline big& operator--() {}
+inline big& operator-- 
+big operator<<(int) const {}
+inline big& operator<<=(int) {}
+big operator>>(int) const {}
+inline big& operator>>=(int) {}
+big operator*(const big&) const {}
+inline big& operator*=(const big&) {}
+big operator/(const big&) const {}
+inline big& operator/=(const big&) {}
+big operator%(const big&) const {}
+inline big& operator%=(const big&) {}
+big operator^(const big&) const {}
+inline big& operator^=(const big&) {}
+inline bool intg() const {}
+inline big fabs() const {}
+inline big floor() {}
+inline big ceil() {}
+inline big round() {}
+inline big invert() {}
+inline int log(int) {}
+wostringstream c_str(int) const {}
+inline wstring str() const {}
+friend wostream& operator<<(wostream&, const big&) {}
+}
+static big pow(big, int) {}
+big LCM
+template<typename T> void GeneralizedHeapify(tensor<T>&, int, int) {}
+template<typename T> void GeneralizedHeapSort(tensor<T>&) {}
+class radical {
+int coefficient
+ptrdiff_t Arg
+tensor<int> primes
+radical() {}
+radical(int) {}
+radical(int, int) {}
+radical(int, int, bool) {}
+int GetCoefficient() const {}
+void SetCoefficient(int) {}
+void IncCoefficient(int) {}
+ptrdiff_t arg() const {}
+long double approximation() const {}
+void normalize() {}
+long double operator+(const radical&) const {}
+long double operator-(const radical&) const {}
+long double operator/(const radical&) const {}
+radical operator*(const radical&) const {}
+radical& operator*=(const radical&) {}
+bool negative() const {}
+int len() const {}
+void write(WORD, bool) const {}
+}
+class RadicalSum {
+tensor<radical> elements
+RadicalSum() {}
+RadicalSum(radical) {}
+RadicalSum(tensor<radical>) {}
+long double approximation() const {}
+void normalize() {}
+void NORMALIZE() {}
+long double operator/(const RadicalSum&) const {}
+RadicalSum operator+(const RadicalSum&) const {}
+RadicalSum& operator+=(const RadicalSum&) {}
+RadicalSum operator-(const RadicalSum&) const {}
+RadicalSum& operator-=(const RadicalSum&) {}
+RadicalSum operator*(const RadicalSum&) const {}
+RadicalSum& operator*=(const RadicalSum&) {}
+int len() const {}
+void write(WORD) const {}
+}
+class RadicalFract {
+RadicalSum top
+RadicalSum bottom
+RadicalFract() {}
+RadicalFract(RadicalSum) {}
+RadicalFract(RadicalSum, RadicalSum) {}
+long double approximation() const {}
+RadicalFract operator+(const RadicalFract&) const {}
+RadicalFract& operator+=(const RadicalFract&) {}
+RadicalFract operator-(const RadicalFract&) const {}
+RadicalFract& operator-=(const RadicalFract&) {}
+RadicalFract operator*(const RadicalFract&) const {}
+RadicalFract& operator*=(const RadicalFract&) {}
+RadicalFract operator/(const RadicalFract&) const {}
+RadicalFract& operator/=(const RadicalFract&) {}
+void write(WORD) const {}
+}
+template<typename T_int = long double>struct MONOMIAL {
+int degree
+T_int coefficient
+bool operator == (const MONOMIAL&) const {}
+}
+template<typename T_int = long double>class monomial {
+T_int coefficient
+tensor<int> exp
+bool operator==(const monomial&) const {}
+int degree() const {}
+bool IsSquare() const {}
+monomial Root(int) const {}
+}
+template<typename T_int = long double>class factor : public tensor<monomial<T_int>> {
+factor() {}
+factor(initializer_list<monomial<T_int>>){}
+factor(size_t, const monomial<T_int>&) {}
+factor(size_t) {}
+factor(tensor<monomial<T_int>>) {}
+void SortByDegree() {}
+void SortByExponents() {}
+factor derivate(size_t) const {}
+T_int operator()(tensor<long double> params) const {}
+bool operator()(T_int x, size_t Vpos, bool) const {}
+inline factor neg() const {}
+_NODISCARD wstring str(int) override {}
+friend wostream& operator<<(wostream&, factor&) {}
+}
+template<typename T_int = long double>class FACTOR : public tensor<MONOMIAL<T_int>> {
+FACTOR() {}
+FACTOR(initializer_list<MONOMIAL<T_int>>){}
+FACTOR(size_t, const MONOMIAL<T_int>&) {}
+FACTOR(size_t) {}
+FACTOR(tensor<MONOMIAL<T_int>>) {}
+void sort() {}
+void complete(int) {}
+FACTOR derivate() const {}
+T_int operator()(T_int x) const {}
+inline FACTOR neg() const {}
+_NODISCARD wstring str(int) override {}
+friend wostream& operator<<(wostream&, const FACTOR&) {}
+}
+static factor<> ToXV(FACTOR<>) {}
+static FACTOR<> To1V(factor<>) {}
+template<typename T_int = long double>class polynomial : public tensor<factor<T_int>> {
+polynomial() {}
+polynomial(initializer_list<factor<T_int>>){}
+polynomial(size_t, const factor<T_int>&) {}
+polynomial(size_t) {}
+polynomial(tensor<factor<T_int>>) {}
+void open() {}
+void close() {}
+_NODISCARD wstring str(int) override {}
+friend wostream& operator<<(wostream&, polynomial&) {}
+}
+template<typename T_int = long double>class POLYNOMIAL : public tensor<FACTOR<T_int>> {
+POLYNOMIAL() {}
+POLYNOMIAL(initializer_list<FACTOR<T_int>>){}
+POLYNOMIAL(size_t, const FACTOR<T_int>&) {}
+POLYNOMIAL(size_t) {}
+POLYNOMIAL(tensor<FACTOR<T_int>>) {}
+void open() {}
+void close() {}
+_NODISCARD wstring str(int) override {}
+friend wostream& operator<<(wostream&, const POLYNOMIAL&) {}
+}
+static polynomial<> ToXV(POLYNOMIAL<>) {}
+static POLYNOMIAL<> To1V(polynomial<>) {}
+static polynomial<> FromBigToDefault(polynomial<big>) {}
+template <class T_int> factor<T_int> factor<T_int>::operator()(T_int x, size_t Vpos, int) const {}
+template<class T_int> inline factor<T_int> factor<T_int>::operator-(const factor&) const {}
+template<class T_int> inline factor<T_int> factor<T_int>::operator*(const factor&) const {}
+template<class T_int> inline factor<T_int>& factor<T_int>::operator-=(const factor&) {}
+template<class T_int> inline factor<T_int>& factor<T_int>::operator*=(const factor&) {}
+template<class T_int> inline FACTOR<T_int> FACTOR<T_int>::operator-(const FACTOR&) const {}
+template<class T_int> inline FACTOR<T_int> FACTOR<T_int>::operator*(const FACTOR&) const {}
+template<class T_int> inline FACTOR<T_int>& FACTOR<T_int>::operator-=(const FACTOR&) {}
+template<class T_int> inline FACTOR<T_int>& FACTOR<T_int>::operator*=(const FACTOR&) {}
+template<class T = long double>class Fraction {
+polynomial<T> num
+polynomial<T> den
+Fraction() {}
+Fraction(polynomial<T>) {}
+Fraction(polynomial<T>, polynomial<T>) {}
+Fraction extend() {}
+Fraction derivate(size_t) const {}
+Fraction operator+(const Fraction&) const {}
+Fraction operator+=(const Fraction&) {}
+Fraction operator-(const Fraction&) const {}
+Fraction operator-=(const Fraction&) {}
+Fraction operator*(const Fraction&) const {}
+Fraction operator*=(const Fraction&) {}
+Fraction invert() {}
+Fraction operator/(const Fraction&) const {}
+Fraction operator/=(const Fraction&) {}
+Fraction operator()(T x, size_t Vpos) const {}
+T operator()(tensor<long double> params) const {}
+bool operator==(const Fraction&) const {}
+wstring str() {}
+friend wostream& operator<<(wostream&, const Fraction&) {}
+}
+class key : public tensor<int> {
+key(tensor<int>) {}
+key operator!() {}
+key operator~() const {}
+_NODISCARD inline bool operator<(const tensor&) const override {}
+_NODISCARD inline bool operator<=(const tensor&) const override {}
+_NODISCARD inline bool operator>(const tensor&) const override {}
+_NODISCARD inline bool operator>=(const tensor&) const override {}
+}
+tensor<wstring> commands 
+class Expression
+tensor<Expression> __Expr
+class Expression {
+bool activator
+_STD map<key, wstring> terms
+tensor<key> lines
+tensor<key> lister
+tensor<COORD> FractionLinesPos
+tensor<short> FractionLinesLenght
+_STD map<key
+_STD COORD> dimensions
+_STD positions
+Expression() {}
+Expression& operator=(const Expression&) {}
+bool contains(key) const {}
+void clean() {}
+tensor<key> underbranch(key) const {}
+void Insert(key, wstring, wstring) {}
+void Remove(key) {}
+COORD GetDimensions(key) {}
+void GetPositions() {}
+bool out(COORD&) {}
+COORD CursorPosition(key) {}
+bool rewrite(COORD&, key, int) {}
+Fraction<ReturnedFractionType> in (switchcase&, wstring&, bool&, bool&) {}
+Fraction<ReturnedFractionType> Export (switchcase&, wstring&, bool&, bool&) {}
+}
+tensor_t PrimeNumbers
+_STD map<int, wstring> CalculatedData
+struct Console {
+wstring Text
+WORD Attribute
+void log() const {}
+bool operator!=(const Console&) const {}
+friend wostream& operator<<(wostream&, const Console&) {}
+}
+class ConsoleStream : public tensor<Console> {
+ConsoleStream() {}
+ConsoleStream(initializer_list<Console>) {}
+ConsoleStream operator+(ConsoleStream) const {}
+inline void output() const {}
+inline void log() {}
+friend wostream& operator<<(wostream&, const ConsoleStream&) {}
+}
+ConsoleStream ConsoleText
+template<typename _Ty = long double> class Matrix : public tensor<tensor<_Ty>> {
+Matrix() {}
+int output(COORD, int&, WORD) const {}
+bool input(wstring&) {}
+void DisplayWith(const Matrix) const {}
+void DisplayWith(const Matrix, const Matrix) const {}
+Matrix operator+(const Matrix) const {}
+Matrix operator+=(const Matrix) {}
+Matrix operator-(const Matrix) const {}
+Matrix operator-=(const Matrix) {}
+tensor<_Ty> operator*(const tensor<_Ty>) const {}
+Matrix operator*(const _Ty) const {}
+Matrix& operator*=(const _Ty) {}
+Matrix operator*(const Matrix) const {}
+Matrix& operator*=(const Matrix) {}
+template<typename T = _Ty> T det() {}
+Matrix invert(_Ty) {}
+tensor<double> EigenValues() {}
+Matrix EigenVectors(tensor<double>) {}
+}
+template<typename T> T EmptyProduct(T) {}
+HDC GHDC
+class Point__ {
+int ScreenX
+int ScreenY
+tensor<long double> Normal
+long double x
+long y
+long z
+Point__() {}
+Point__(long double, long double, long double) {}
+Point__(factor<>, long double, long double) {}
+Point__(Fraction<>, long double, long double) {}
+int GetScreenX() {}
+int GetScreenY() {}
+tensor<long double> GetNormalVector() const {}
+bool Void() const {}
+Point__& operator=(const Point__&) {}
+tensor<long double> SetNormalVector(Fraction<>, Fraction<>) {}
+void Display(int, COLORREF) {}
+void StdDisplay (Fraction<>, Fraction<>, Fraction<>, tensor<long double>) {}
+}
+template<typename T> bool isnan(Fraction<T>) {}
+template<typename T> bool isnan(Matrix<T>) {}
+class NumberData {
+ptrdiff_t number
+wstring code
+int degree
+wstring expression
+tensor<ptrdiff_t> sequence
+divisor div
+digitRatio digit
+strong_ordering operator<=>(const NumberData&) const {}
+NumberData(ptrdiff_t, const wstring&, int, const wstring&, const tensor<ptrdiff_t>&, const divisor&, const digitRatio&) {}
+void printf() {}
+}
+tensor<wstring> Numbers
+tensor<wstring> Polynomials
+tensor<wstring> Expressions
+tensor<tensor<wstring>> GlobalNumerators
+tensor<tensor<wstring>> GlobalDenominators
+tensor<tensor<wstring>> GlobalOperators
+tensor<tensor<short>> ActionsList
+int main() {}
+static wstring Handler(wstring) {}
+static size_t Factorial(size_t) {}
+static size_t BinomialCoeff(size_t, size_t) {}
+static ptrdiff_t Gcd(ptrdiff_t, ptrdiff_t) {}
+static big Gcd(big, big) {}
+template<typename T>static int Gcd(tensor<T>) {}
+static big Gcd(tensor<big>) {}
+static ptrdiff_t intpow(ptrdiff_t, int) {}
+inline static wstring ConvertEnumToWString(switchcase) {}
+inline static switchcase ConvertWStringToEnum(wstring) {}
+static void ReassigneEnum(switchcase&) {}
+namespace ConsoleLogData {
+int RotAngle
+int PolygDegree
+int PolygonSides
+int CircleCenterX
+int CircleCenterY
+int CircleRotDegreeAngle
+bool DecreaseAngle
+bool DecreaseWidth
+double DWidth
+const tensor<int> spectrum
+}
+static void ClearArea(COORD, COORD) {}
+static void WriteFraction(wstring, wstring, wstring&, COORD) {}
+static void PrintPFrame (double, int, double, COORD) {}
+static void DrawFrame (int, double, int, int, double) {}
+static void DrawCircleSquare(COORD) {}
+inline static void CS_CenterPrinter() {}
+inline static void CS_CornerPrinter() {}
+static void ProgressBar(long double, double) {}
+static long double WaitingScreen(auto, auto) {}
+static wstring CTSuperScript(wchar_t) {}
+static wstring CFSuperScript(wstring) {}
+static wstring ElabExponents(wstring&) {}
+static void DeduceFromExponents(wstring&) {}
+static wstring GetLine(tensor<wstring>&, bool) {}
+static wstring GetUserNum (wstring, ptrdiff_t, ptrdiff_t, bool) {}
+static void SetDebug(wstring, switchcase&, bool&, ptrdiff_t&, ptrdiff_t&, ptrdiff_t&) {}
+static void SendCtrlPlusMinus(bool) {}
+static void SendString(wstring) {}
+static void MonitorConsoleSize(COORD, atomic_bool&) {}
+static void UserInputThread() {}
+RECT ClientRect
+namespace WindowData {
+bool redo
+enum states {
+MIN, MAX, H_FLX, A_FLX, D_FLX
+}
+LPARAM Coords
+LPARAM Current
+bool enable
+double Zoom
+wchar_t __save
+int gIndex
+tensor<int> Indexlist
+int shiftX
+int shiftY
+tensor<tensor<int>> memory
+class DATA {
+COLORREF Color
+Fraction<> Function
+wstring ID
+tensor<int> States
+tensor<long double> StatX
+tensor<long StatY
+DATA() {}
+bool operator==(DATA) {}
+}
+tensor<DATA> List
+DATA::DATA(Fraction<>) {}
+}
+namespace Window3Data {
+enum states {
+MINIMUM, MAXIMUM, SADDLE, UNKNOWN,
+}
+tensor<int> def
+tensor<int> Light
+double Zoom
+bool enable
+LPARAM Coords{}, Current
+tensor<long double> StatX, StatY, StatZ
+Fraction<> Function, PartialXder, PartialYder
+auto Theta
+auto Phi
+}
+static void DrawLine(int, int, int, int, HPEN) {}
+static void DrawLineToBuffer(HDC, HBITMAP, int, int, int, int, HPEN) {}
+static void DrawLine(Point__, Point__, HPEN) {}
+static void DrawLineToBuffer (HDC, HBITMAP, Point__, Point__, HPEN) {}
+static void IncrementCalculator(double, double&, double&) {}
+static void ProjectPoint(tensor<long double>, int&, int&) {}
+static void ProjectAndDrawLine (tensor<long double>, tensor<long double>, HPEN) {}
+static void DrawAxis(HDC, HBITMAP, double, double) {}
+static LRESULT CALLBACK WindowProcessor2D(HWND, UINT, WPARAM, LPARAM) {}
+static BOOL CreateGraph(Fraction<>) {}
+static LRESULT CALLBACK WindowProcessor3D(HWND, UINT, WPARAM, LPARAM) {}
+static void Project3DGraph(Fraction<>) {}
+static bool Prime(ptrdiff_t) {}
+static void PrimeNCalculator(ptrdiff_t, ptrdiff_t) {}
+static tensor<compost> DecomposeNumber(ptrdiff_t) {}
+static tensor<int> DecomposeStrings(wstring) {}
+static tensor<wstring> Fractioner(wstring) {}
+static tensor<tensor<wstring>> FractPolynomial(wstring) {}
+static wstring Cript(ptrdiff_t) {}
+static wstring FactNumber(ptrdiff_t) {}
+static int ExeStrings(wstring) {}
+static divisor DivisorCalculator(wstring) {}
+static digitRatio DigitRationalizer(ptrdiff_t) {}
+static tensor<int> DivisorCounter(int) {}
+static NumberData ExecuteSimpledeg(ptrdiff_t) {}
+static NumberData ExecuteDegree(ptrdiff_t) {}
+static NumberData ExecuteSimpleFact(ptrdiff_t) {}
+static NumberData ExecuteFactor(ptrdiff_t) {}
+static NumberData ExecuteSimpleDF(ptrdiff_t) {}
+static NumberData ExecuteDigit(ptrdiff_t) {}
+static NumberData ExecuteDegFactor(ptrdiff_t) {}
+static NumberData ExecuteDegDigit(ptrdiff_t) {}
+static NumberData ExecuteFactDigit(ptrdiff_t) {}
+static NumberData ExecuteAll(ptrdiff_t) {}
+static wstring PolynomialSyntax(wstring) {}
+static wstring PolynomialSyntaxDirector(wstring) {}
+static wstring UpdateString(wstring&) {}
+static wstring NumberCodeSyntax(wstring) {}
+static ptrdiff_t NumberConverter(size_t, wstring) {}
+static ptrdiff_t StringConverter(wstring) {}
+static void CodeConverter (wstring, wstring, bool, bool) {}
+static void LongComputation (wstring, wstring, bool, bool) {}
+static factor<big> GetMonomials(wstring) {}
+static polynomial<big> GetMonomialsRedirector(wstring) {}
+static polynomial<big> GetMonomialsAssister(wstring) {}
+template<typename T> T ObjectOperations (wstring&, tensor<T>, tensor<wstring>, wstring) {}
+static tensor<tensor<long double>> FromPolynomialToPos(factor<>, int&, tensor<int>&, tensor<int>&, tensor<int>&, tensor<tensor<int>>&, tensor<tensor<int>>&) {}
+template<typename T_int = long double> static factor<T_int> PolynomialSum(factor<T_int>) {}
+template<typename T_int = long double> static factor<T_int> PolynomialMultiply(polynomial<T_int>) {}
+static void PolynomialDivide (FACTOR<>, FACTOR<>, FACTOR<>&, FACTOR<>&) {}
+static polynomial<> Total(factor<>) {}
+static polynomial<> Partial(factor<>) {}
+static polynomial<> Binomial(factor<>) {}
+static polynomial<> Trinomial(factor<>) {}
+static polynomial<> SquareDifference(factor<>) {}
+static polynomial<> Ruffini(factor<>) {}
+static polynomial<> CompleteTheSquare(factor<>) {}
+static polynomial<> TrinomialSquare(factor<>) {}
+static tensor<Fraction<big>> GetManyFractions (tensor<wstring>, tensor<wstring>, wstring&) {}
+static FACTOR<> Complementary(POLYNOMIAL<>, FACTOR<>, int) {}
+static void Simplify(Fraction<>&, int&, int&) {}
+static void PrintFraction (int, int, int&, bool, Fraction<>) {}
+static void PrintFractionaryResult (int, int, int&, Fraction<>, POLYNOMIAL<>, POLYNOMIAL<>, bool, bool, tensor<double>, tensor<POLYNOMIAL<>>) {}
+static void Approximator(tensor<long double>&, long double&) {}
+static tensor<wstring> EquationSolver(factor<>) {}
+static tensor<tensor<long double>> SystemSolver(tensor<factor<>>) {}
+static tensor<long double> RootExtractor(polynomial<>) {}
+static void FractDisequationMain(polynomial<>, polynomial<>, tensor<wstring>&, tensor<bool>&, bool&, bool&) {}
+static ConsoleStream GetAlgebricSolution(tensor<wstring>, tensor<bool>, bool, bool, bool) {}
+static bool ParamDisequationSetup(polynomial<>&, polynomial<>&, polynomial<>&, tensor<bool>&, tensor<long double>&, factor<>&, tensor<factor<>>&, tensor<factor<>>&, bool&, bool&) {}
+static void ParamDisequationMain(polynomial<>, tensor<factor<>>, tensor<factor<>>, tensor<long double>, size_t&, tensor<tensor<factor<>>>&, tensor<long double>&, tensor<long double>&, tensor<wstring>&) {}
+static ConsoleStream GetParametricSolution(wchar_t, size_t, size_t, bool, bool, bool, tensor<bool>, polynomial<>&, polynomial<>&, factor<>, tensor<factor<>>, tensor<factor<>>, tensor<tensor<factor<>>>, tensor<long double>, tensor<long double>, tensor<wstring>) {}
+static ConsoleStream DisequationSolutionPrinter(polynomial<>, polynomial<>, int, bool, bool) {}
+static void CodeToNumber(switchcase&) {}
+tensor<tensor<wstring>> Map
+static wstring ExpandNumber(switchcase&, big, int, bool) {}
+static void Repeater(switchcase&, wstring, NumberData) {}
+static void Loop(switchcase&, wstring, NumberData, bool) {}
+template<typename Type = wstring> static polynomial<> DecompPolynomial(switchcase&, Type) {}
+static void DecompAndSolve(switchcase&) {}
+static void DecompMatrices(switchcase&) {}

@@ -374,8 +374,8 @@ int main()
 
 			// calcolo fine del nome
 			bool activated{ true };
-			size_t Firstspace{ Textlines[i].size() - 1 };
-			for (size_t j = 0; j < Textlines[i].size(); ++j)
+			auto Firstspace{ Textlines[i].size() - 1 };
+			for (size_t j = 0; j <= Firstspace; ++j)
 			{
 				if (Textlines[i].at(j) == L'(')
 				{
@@ -630,7 +630,7 @@ int main()
 
 	// rimozione di altri spazi bianchi
 	Text = L"\n" + Text;
-	size_t LastNotOf{ Text.size() - 1 };
+	auto LastNotOf{ Text.size() - 1 };
 	for (long long i = LastNotOf; i >= 0; --i)
 	{
 		if (Text.at(i) == L'\n')
@@ -663,7 +663,7 @@ int main()
 			Text.erase(i, 1);
 			if (Text.at(i - 1) == L'\t')
 			{
-				Text.at(i) = L' ';
+				Text.at(i - 1) = L' ';
 			}
 		}
 	}
@@ -896,14 +896,13 @@ int main()
 					// se è una variabile globale
 					if (!IsFunction)
 					{
-						Text.erase(ResearchIndex + 1, i - ResearchIndex - 1);
-						Text.insert(Text.begin() + ResearchIndex + 1, L'0');
-						i = ResearchIndex + 2;
+						Text.erase(ResearchIndex, i - ResearchIndex + 1);
+						i = ResearchIndex - 1;
 						break;
 					}
 
 					// rimozione dei segni di uguaglianza
-					size_t LastComma{ params.size() };
+					auto LastComma{ params.size() };
 					for (long long j = LastComma - 1; j >= 0; --j)
 					{
 						switch (params.at(j))
@@ -949,16 +948,6 @@ int main()
 		}
 	}
 
-	// output sul file iniziale
-	wofstream output("output.txt", ios::trunc);
-	if (!output.is_open())
-	{
-		wcerr << L"Errore nell'apertura del file per la scrittura.\n";
-		return 0;
-	}
-	output << Text;
-	output.close();
-
 	// output lista delle macro
 	wofstream final_output("hierarchy.txt", ios::trunc);
 	if (!final_output.is_open())
@@ -968,7 +957,7 @@ int main()
 	}
 	for (const auto& macro : macros)
 	{
-		final_output << L"MACRO " << macro << L'\n';
+		final_output << L"MACRO  " << macro << L'\n';
 	}
 
 	// tokenizzazione iniziale
@@ -980,6 +969,13 @@ int main()
 		// per andare a capo dopo una funzione
 		if (Text.at(i - 1) == L'{' and Text.at(i) == L'}')
 		{
+			if (i != Text.size() - 1)
+			{
+				if (Text.at(i + 1) == L',')
+				{
+					continue;
+				}
+			}
 			Text.insert(Text.begin() + i + 1, L';');
 		}
 	}
@@ -992,19 +988,12 @@ int main()
 			CharIndex = i;
 			continue;
 		}
-
-		// apertura parentesi graffe
-		if (Text.at(i) == L'{' and Text.at(i + 1) != L'}')
-		{
-			Textlines.push_back(Text.substr(CharIndex + 1, i - CharIndex));
-			CharIndex = i;
-		}
 	}
 
 	// miglioramenti della tokenizzazione
-	if (Textlines[0].at(0) != Text.at(0))
+	if (Textlines[0].at(0) == L' ')
 	{
-		Textlines[0] = Text.at(0) + Textlines[0];
+		Textlines[0].erase(0, 1);
 	}
 	for (auto& line : Textlines)
 	{
@@ -1034,6 +1023,85 @@ int main()
 		}
 	}
 
+	// andamento a capo dopo alcune parentesi graffe
+	for (size_t i = 0; i < Textlines.size() - 1; ++i)
+	{
+		// ricavo della prima parola
+	WordConstruction:
+		auto WordEnd{ Textlines[i].size() - 1 };
+		for (size_t j = 0; j < Textlines[i].size(); ++j)
+		{
+			if (!isalnum(Textlines[i].at(j)))
+			{
+				WordEnd = j;
+				break;
+			}
+		}
+		auto Word{ Textlines[i].substr(0, WordEnd) };
+
+		// filtro keyword
+		if (Word == L"public" or Word == L"private" or Word == L"protected")
+		{
+			Textlines[i].erase(0, Word.size() + 1);
+			if (Textlines[i].empty() or Textlines[i].empty())
+			{
+				Textlines.erase(Textlines.begin() + i--);
+				continue;
+			}
+			if (Textlines[i].at(0) == L' ')
+			{
+				Textlines[i].erase(0, 1);
+			}
+			goto WordConstruction;
+		}
+		if (Word != L"namespace" and Word != L"class" and
+			Word != L"struct" and Word != L"union" and Word != L"template")
+		{
+			continue;
+		}
+
+		// annotazione della posizione della parentesi graffa
+		auto SeparationIndex{ Textlines[i].find(L'{') };
+		if (SeparationIndex == wstring::npos)
+		{
+			continue;
+		}
+
+		// esclusione funzioni template
+		bool Continue{ false };
+		for (long long j = SeparationIndex - 1; j >= 0; --j)
+		{
+			if (Textlines[i].at(j) != L' ')
+			{
+				Continue = Textlines[i].at(j) == L')';
+				break;
+			}
+		}
+		if (Continue)
+		{
+			continue;
+		}
+
+		// spostamento a capo ed eliminazione di eventuali spazi
+		wstring NewLine{ Textlines[i].substr(SeparationIndex + 1) };
+		if (NewLine.empty())
+		{
+			Textlines[i++].erase(SeparationIndex + 1);
+			continue;
+		}
+		if (NewLine.at(0) == L' ')
+		{
+			NewLine.erase(0, 1);
+			if (NewLine.empty())
+			{
+				Textlines[i++].erase(SeparationIndex + 1);
+				continue;
+			}
+		}
+		Textlines.insert(Textlines.begin() + i + 1, NewLine);
+		Textlines[i].erase(SeparationIndex + 1);
+	}
+
 	// eliminazione di alcune righe vuote
 	for (long long i = Textlines.size() - 1; i >= 0; --i)
 	{
@@ -1043,131 +1111,165 @@ int main()
 		}
 	}
 
-	// separazione delle dichiarazioni di più variabili in una singola istruzione
+	// spezzamento delle inizializzazioni di più variabili in un'istruzione
+	int balance1{}, balance2{}, balance3{};
 	for (size_t i = 0; i < Textlines.size(); ++i)
 	{
-		// ricerca di una virgola a bilancio
-		int balance1{}, balance2{};
+		//Debug(i, min(int(i), 10), 10);
 		for (size_t j = 0; j < Textlines[i].size(); ++j)
 		{
 			switch (Textlines[i].at(j))
 			{
-				case L'(':
+			case L'{':
+				if (i == 553)
+				{
+					i = i;
+				}
+				if (j != Textlines[i].size() - 1)
+				{
 					balance1++;
-					break;
-				case L')':
+				}
+				break;
+			case L'}':
+				if (balance1 > 0)
+				{
 					balance1--;
-					break;
-				case L'{':
-					balance2++;
-					break;
-				case L'}':
-					balance2--;
-					break;
-				case L',':
-					if (balance1 != 0 or balance2 != 0 or
-						Textlines[i].substr(0, 5) == L"using")
+				}
+				break;
+			case L'(':
+				balance2++;
+				break;
+			case L')':
+				balance2--;
+				break;
+
+			case L'<': {
+				// skip dei nomi degli operatori
+				long long OperatorIndex{ -1 };
+				for (long long k = j - 1; k >= 0; --k)
+				{
+					if (Textlines[i].at(k) != L'<' and
+						Textlines[i].at(k) != L'=' and
+						Textlines[i].at(k) != L'>')
+					{
+						OperatorIndex = k;
+						break;
+					}
+				}
+				if (OperatorIndex > 8)
+				{
+					if (Textlines[i].substr(OperatorIndex - 7, 8) == L"operator")
 					{
 						break;
 					}
-					wstring datatype;
-					vector<size_t> CommaLines, CommaIndeces;
+				}
+			}
+				balance3++;
+				break;
 
-					// ricerca di un inizio riga a bilancio
-					bool Break{ false };
-					long long rindex = j;
-					for (long long k = i; k >= 0; --k)
+			case L'>': {
+				// skip dei nomi degli operatori
+				long long OperatorIndex{ -1 };
+				for (long long k = j - 1; k >= 0; --k)
+				{
+					if (Textlines[i].at(k) != L'<' and
+						Textlines[i].at(k) != L'=' and
+						Textlines[i].at(k) != L'>')
 					{
-						for (;; --rindex)
-						{
-							// modifiche al bilanciamento
-							switch (Textlines[k].at(rindex))
-							{
-							case L'(':
-								balance1--;
-								break;
-							case L')':
-								balance1++;
-								break;
-							case L'{':
-								balance2--;
-								break;
-							case L'}':
-								balance2++;
-								break;
-							case L',':
-								if (Textlines[i].substr(0, 5) == L"using")
-								{
-									break;
-								}
-								CommaLines.push_back(k);
-								CommaIndeces.push_back(rindex);
-								break;
-							}
-
-							// inizio della riga
-							if (rindex == 0)
-							{
-								if (balance1 != 0 or balance2 != 0)
-								{
-									break;
-								}
-
-								// calcolo del datatype
-								datatype = Textlines[k];
-								for (size_t l = 0; l < Textlines[l].size(); ++l)
-								{
-									if (!isalnum(Textlines[k].at(l)) and
-										Textlines[k].at(l) != L'_' and
-										Textlines[k].at(l) != L' ')
-									{
-										datatype.erase(l);
-										break;
-									}
-								}
-
-								// rimozione del nome della variabile
-								for (long long l = datatype.size() - 1; l >= 0; --l)
-								{
-									if (!isalnum(datatype.at(l)) and
-										datatype.at(l) != L'_')
-									{
-										datatype.erase(l);
-										break;
-									}
-								}
-								Break = true;
-								break;
-							}
-						}
-
-						// uscita
-						if (Break)
-						{
-							break;
-						}
-
-						// nuovo giro del loop
-						if (k > 0)
-						{
-							rindex = Textlines[k - 1].size() - 1;
-						}
+						OperatorIndex = k;
+						break;
 					}
+				}
+				if (OperatorIndex > 8)
+				{
+					if (Textlines[i].substr(OperatorIndex - 7, 8) == L"operator")
+					{
+						break;
+					}
+				}
+			}
+				balance3--;
+				break;
 
-					// finire qui il codice
-					// ...
+			case L',':
+				if (balance1 != 0 or balance2 != 0 or balance3 != 0)
+				{
+					break;
+				}
+
+				// calcolo del datatype
+				int AnotherBalance{};
+				wstring datatype{ Textlines[i].substr(0, j) };
+				for (long long k = datatype.size() - 1; k >= 0; --k)
+				{
+					switch (datatype.at(k))
+					{
+					case L'{':
+						AnotherBalance++;
+						break;
+					case L'}':
+						AnotherBalance--;
+						break;
+					case L' ':
+						if (AnotherBalance == 0)
+						{
+							datatype.erase(k);
+						}
+						break;
+					}
+				}
+
+				// spostamento a capo in base alle virgole
+				for (long long k = Textlines[i].size() - 1; k >= 0; --k)
+				{
+					if (Textlines[i].at(k) == L',')
+					{
+						auto NewWord{ Textlines[i].substr(k + 1) };
+						if (NewWord.at(0) != L' ')
+						{
+							NewWord = L' ' + NewWord;
+						}
+						Textlines.insert(
+							Textlines.begin() + i + 1, datatype + NewWord
+						);
+						Textlines[i].erase(k);
+					}
+				}
+
+				j = 0;
+				break;
 			}
 		}
 	}
 
-	// output righe
-	final_output << L'\n';
-	for (const auto& line : Textlines)
+	// apertura parentesi graffe
+	for (size_t i = 0; i < Textlines.size(); ++i)
 	{
-		final_output << line << L'\n';
+		for (size_t j = 0; j < Textlines[i].size() - 1; ++j)
+		{
+			if (Textlines[i].at(j) == L'{' and Textlines[i].at(j + 1) != L'}')
+			{
+				wstring NewLine{ Textlines[i].substr(j + 1) };
+				if (NewLine.at(0) == L' ')
+				{
+					NewLine.erase(0, 1);
+				}
+				Textlines.insert(Textlines.begin() + i + 1, NewLine);
+				Textlines[i++].erase(j + 1);
+			}
+		}
 	}
-	final_output.close();
-	return 0;
+
+	// chiusura di altre parentesi graffe
+	for (long long i = Textlines.size() - 1; i > 0; --i)
+	{
+		if (Textlines[i] == L"}" and
+			Textlines[i - 1].at(Textlines[i - 1].size() - 1) == L'{')
+		{
+			Textlines[i - 1] += L"}";
+			Textlines.erase(Textlines.begin() + i);
+		}
+	}
 
 	// spostamento a capo di una parentesi graffa chiusa
 	for (long long i = Textlines.size() - 1; i >= 0; --i)
@@ -1238,14 +1340,13 @@ int main()
 					Textlines.erase(Textlines.begin() + LineIndex + 1);
 				}
 				i = LineIndex;
-				Textlines[LineIndex] += L'}';
+				Textlines[LineIndex].erase(Textlines[LineIndex].size() - 1);
 			}
 			continue;
 		}
 
 		// calcolo prima parola in un'istruzione
-	WordConstruction:
-		size_t WordEnd{ Textlines[i].size() - 1 };
+		auto WordEnd{ Textlines[i].size() - 1 };
 		for (size_t j = 0; j <= WordEnd; ++j)
 		{
 			if (!isalnum(Textlines[i].at(j)) and Textlines[i].at(j) != L'_')
@@ -1270,27 +1371,18 @@ int main()
 			continue;
 		}
 
-		// rimozione degli specificatori di accesso
-		if (Word == L"public" or Word == L"private" or Word == L"protected")
-		{
-			Textlines[i].erase(0, Word.size() + 1);
-			if (Textlines[i].at(0) == L' ')
-			{
-				Textlines[i].erase(0, 1);
-			}
-			if (Textlines[i].empty())
-			{
-				continue;
-			}
-			goto WordConstruction;
-		}
-
 		// filtro contenuti della riga
 		if (Textlines[i].find(L'(') != wstring::npos or
 			Textlines[i].find(L'=') != wstring::npos or
-			Textlines[i].find(L'}') != wstring::npos or
 			Textlines[i].find(L'{') == wstring::npos)
 		{
+			continue;
+		}
+
+		// inizializzazione uniforme su una singola riga
+		if (Textlines[i].find(L'}') != wstring::npos)
+		{
+			Textlines[i].erase(Textlines[i].size() - 2);
 			continue;
 		}
 
@@ -1300,4 +1392,120 @@ int main()
 		Balance = 1;
 	}
 
+	// rimozione dell'inizializzazione con assegnazione
+	for (size_t i = 0; i < Textlines.size() - 1; ++i)
+	{
+		auto index{ Textlines[i].find(L'=') };
+		if (index != wstring::npos and
+			Textlines[i].find(L'<') == wstring::npos and
+			Textlines[i].find(L"operator") == wstring::npos)
+		{
+			Textlines[i].erase(index);
+			if (Textlines[i].at(Textlines[i].size() - 1) == L' ')
+			{
+				Textlines[i].erase(Textlines[i].size() - 1);
+			}
+		}
+	}
+
+	// eliminazione dei nomi dei parametri
+	for (auto& Line : Textlines)
+	{
+		// estrazione lista dei parametri
+		auto first{ Line.find(L'(') };
+		if (first == wstring::npos)
+		{
+			continue;
+		}
+		auto last{ Line.find(L')') };
+		if (last - first == 1)
+		{
+			continue;
+		}
+		auto ParameterList{ Line.substr(first + 1, last - first - 1) };
+
+		// eliminazione degli spazi agli estremi
+		size_t firstpos{}, lastpos{};
+		if (ParameterList.at(ParameterList.size() - 1) == L' ')
+		{
+			ParameterList.erase(ParameterList.size() - 1, 1);
+		}
+		if (ParameterList.at(0) == L' ')
+		{
+			ParameterList.erase(0, 1);
+		}
+		auto WordBound{ ParameterList.size() };
+
+		// eliminazione dei nomi
+		bool found{ false };
+		for (long long i = WordBound - 1; i < ParameterList.size() and i >= 0; --i)
+		{
+			if (ParameterList.at(i) != L' ' and ParameterList.at(i) != L',')
+			{
+				continue;
+			}
+		
+			bool comma{ ParameterList.at(i) == L',' };
+			if (!found)
+			{
+				ParameterList.erase(i + comma, WordBound - i - comma);
+			}
+			found = true;
+				
+			if (comma)
+			{
+				WordBound = i;
+				found = false;
+			}
+		}
+
+		// resa degli spazi
+		for (size_t i = 0; i < ParameterList.size(); ++i)
+		{
+			if (ParameterList.at(i) != L',')
+			{
+				continue;
+			}
+			if (i < ParameterList.size())
+			{
+				if (ParameterList.at(i + 1) != L' ')
+				{
+					ParameterList.insert(ParameterList.begin() + i + 1, L' ');
+				}
+			}
+			if (i > 0)
+			{
+				if (ParameterList.at(i - 1) == L' ')
+				{
+					ParameterList.erase(i - 1, 1);
+					i--;
+				}
+			}
+		}
+
+		Line.replace(first + 1, last - first - 1, ParameterList);
+	}
+
+	// rimozione funzioni vuote
+	for (long long i = Textlines.size() - 1; i >= 0; --i)
+	{
+		if (Textlines[i].find(L'(') != wstring::npos and
+			Textlines[i].find(L'{') == wstring::npos)
+		{
+			Textlines.erase(Textlines.begin() + i);
+		}
+	}
+
+	// eliminazione delle virgole a bilancio
+
+	// aggiunta dell'indentazione
+
+	// output righe
+	final_output << L'\n';
+	for (const auto& Line : Textlines)
+	{
+		final_output << Line << L'\n';
+	}
+	final_output.close();
+	return 0;
 }
