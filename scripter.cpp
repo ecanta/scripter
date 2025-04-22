@@ -894,7 +894,7 @@ int main()
 					}
 
 					// se è una variabile globale
-					if (!IsFunction)
+					if (!IsFunction and params != L"int")
 					{
 						Text.erase(ResearchIndex, i - ResearchIndex + 1);
 						i = ResearchIndex - 1;
@@ -1120,10 +1120,6 @@ int main()
 			switch (Textlines[i].at(j))
 			{
 			case L'{':
-				if (i == 553)
-				{
-					i = i;
-				}
 				if (j != Textlines[i].size() - 1)
 				{
 					balance1++;
@@ -1423,6 +1419,12 @@ int main()
 		}
 		auto ParameterList{ Line.substr(first + 1, last - first - 1) };
 
+		// operatore speciale
+		if (ParameterList == L"int")
+		{
+			continue;
+		}
+
 		// eliminazione degli spazi agli estremi
 		size_t firstpos{}, lastpos{};
 		if (ParameterList.at(ParameterList.size() - 1) == L' ')
@@ -1616,7 +1618,7 @@ int main()
 		}
 
 		// se il template è specificato
-		size_t TpNameIndexing{ Textlines[i].find(L'<' + TpName + L'>') };
+		size_t TpNameIndexing{ Textlines[i].rfind(L'<' + TpName + L'>') };
 		if (TpNameIndexing != wstring::npos)
 		{
 			TpNameIndexing += TpName.size() + 2;
@@ -1624,7 +1626,8 @@ int main()
 			{
 				TpNameIndexing++;
 			}
-			if (Textlines[i].at(TpNameIndexing) == L'(')
+			if (Textlines[i].at(TpNameIndexing) == L'(' or
+				Textlines[i].at(TpNameIndexing) == L':')
 			{
 				continue;
 			}
@@ -1689,12 +1692,12 @@ int main()
 			LastString = L"}";
 			continue;
 		}
-
+		
 		// variabile di un enum
 		long long space{ -1 };
 		for (size_t i = 0; i < Line.size(); ++i)
 		{
-			if (!isalpha(Line.at(i)))
+			if (!isalpha(Line.at(i)) and Line.at(i) != L'_')
 			{
 				space = i;
 				break;
@@ -1816,7 +1819,7 @@ int main()
 		// funzione
 		if (Line.find(L'(') != wstring::npos)
 		{
-			Line.erase(Line.find(L')') + 1);
+			Line.erase(Line.rfind(L')') + 1);
 			output << wstring(IndentationTabs, L'\t');
 			output << L"FUNCT  " << Line << L'\n';
 			LastString = Line;

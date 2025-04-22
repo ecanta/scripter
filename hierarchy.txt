@@ -132,11 +132,11 @@ CLASS  complex<Ty>:
 	FUNCT  complex operator+(complex)
 	FUNCT  inline complex& operator+=(complex)
 	FUNCT  inline complex& operator++()
-	VAR  inline complex& operator++ 
+	FUNCT  inline complex& operator++(int)
 	FUNCT  complex operator-(complex)
 	FUNCT  inline complex& operator-=(complex)
 	FUNCT  inline complex& operator--()
-	VAR  inline complex& operator-- 
+	FUNCT  inline complex& operator--(int)
 	FUNCT  complex operator*(complex)
 	FUNCT  inline complex& operator*=(complex)
 	FUNCT  complex operator/(complex)
@@ -176,11 +176,11 @@ CLASS  big:
 	FUNCT  big operator+(const big&)
 	FUNCT  inline big& operator+=(const big&)
 	FUNCT  inline big& operator++()
-	VAR  inline big& operator++ 
+	FUNCT  inline big& operator++(int)
 	FUNCT  big operator-(const big&)
 	FUNCT  inline big& operator-=(const big&)
 	FUNCT  inline big& operator--()
-	VAR  inline big& operator-- 
+	FUNCT  inline big& operator--(int)
 	FUNCT  big operator<<(int)
 	FUNCT  inline big& operator<<=(int)
 	FUNCT  big operator>>(int)
@@ -289,8 +289,8 @@ CLASS  factor<T_int>:
 	FUNCT  void SortByDegree()
 	FUNCT  void SortByExponents()
 	FUNCT  factor derivate(size_t)
-	FUNCT  T_int operator()
-	FUNCT  bool operator()
+	FUNCT  T_int operator()(tensor<long double> params)
+	FUNCT  bool operator()(T_int x, size_t Vpos, bool)
 	FUNCT  inline factor neg()
 	FUNCT  _NODISCARD wstring str(int)
 	FUNCT  friend wostream& operator<<(wostream&, factor&)
@@ -304,7 +304,7 @@ CLASS  FACTOR<T_int>:
 	FUNCT  void sort()
 	FUNCT  void complete(int)
 	FUNCT  FACTOR derivate()
-	FUNCT  T_int operator()
+	FUNCT  T_int operator()(T_int x)
 	FUNCT  inline FACTOR neg()
 	FUNCT  _NODISCARD wstring str(int)
 	FUNCT  friend wostream& operator<<(wostream&, const FACTOR&)
@@ -337,15 +337,15 @@ CLASS  POLYNOMIAL<T_int>:
 FUNCT  static polynomial<> ToXV(POLYNOMIAL<>)
 FUNCT  static POLYNOMIAL<> To1V(polynomial<>)
 FUNCT  static polynomial<> FromBigToDefault(polynomial<big>)
-FUNCT  factor<T_int> factor<T_int>::operator<T_int>()
-FUNCT  inline factor<T_int> factor<T_int>::operator-<T_int>(const factor&)
-FUNCT  inline factor<T_int> factor<T_int>::operator*<T_int>(const factor&)
-FUNCT  inline factor<T_int>& factor<T_int>::operator-=<T_int>(const factor&)
-FUNCT  inline factor<T_int>& factor<T_int>::operator*=<T_int>(const factor&)
-FUNCT  inline FACTOR<T_int> FACTOR<T_int>::operator-<T_int>(const FACTOR&)
-FUNCT  inline FACTOR<T_int> FACTOR<T_int>::operator*<T_int>(const FACTOR&)
-FUNCT  inline FACTOR<T_int>& FACTOR<T_int>::operator-=<T_int>(const FACTOR&)
-FUNCT  inline FACTOR<T_int>& FACTOR<T_int>::operator*=<T_int>(const FACTOR&)
+FUNCT  factor<T_int> factor<T_int>::operator()(T_int x, size_t Vpos, int)
+FUNCT  inline factor<T_int> factor<T_int>::operator-(const factor&)
+FUNCT  inline factor<T_int> factor<T_int>::operator*(const factor&)
+FUNCT  inline factor<T_int>& factor<T_int>::operator-=(const factor&)
+FUNCT  inline factor<T_int>& factor<T_int>::operator*=(const factor&)
+FUNCT  inline FACTOR<T_int> FACTOR<T_int>::operator-(const FACTOR&)
+FUNCT  inline FACTOR<T_int> FACTOR<T_int>::operator*(const FACTOR&)
+FUNCT  inline FACTOR<T_int>& FACTOR<T_int>::operator-=(const FACTOR&)
+FUNCT  inline FACTOR<T_int>& FACTOR<T_int>::operator*=(const FACTOR&)
 
 CLASS  Fraction<T>:
 	VAR  polynomial<T> num
@@ -364,8 +364,8 @@ CLASS  Fraction<T>:
 	FUNCT  Fraction invert()
 	FUNCT  Fraction operator/(const Fraction&)
 	FUNCT  Fraction operator/=(const Fraction&)
-	FUNCT  Fraction operator()
-	FUNCT  T operator()
+	FUNCT  Fraction operator()(T x, size_t Vpos)
+	FUNCT  T operator()(tensor<long double> params)
 	FUNCT  bool operator==(const Fraction&)
 	FUNCT  wstring str()
 	FUNCT  friend wostream& operator<<(wostream&, const Fraction&)
@@ -545,9 +545,9 @@ NAMESPACE  WindowData:
 	ENUM  states:
 		ENUM_VAR  MIN
 		ENUM_VAR  MAX
-		VAR  H_FLX
-		VAR  A_FLX
-		VAR  D_FLX
+		ENUM_VAR  H_FLX
+		ENUM_VAR  A_FLX
+		ENUM_VAR  D_FLX
 
 	VAR  LPARAM Coords
 	VAR  LPARAM Current

@@ -48,6 +48,7 @@ Non è necessario alcun compilatore specifico (a parte quello per compilare ques
 
 + Il programma può crashare se il file non è stato compilato prima per verificare l'assenza di errori sintattici.
 + Potrebbe non funzionare bene con template complessi
++ Potrebbero esserci degli errori con le funzioni a cui manca il nome di un parametro
 
 <h2>Autore</h2>
 
