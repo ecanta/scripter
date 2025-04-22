@@ -47,7 +47,7 @@ Non è necessario alcun compilatore specifico (a parte quello per compilare ques
 <h2>Limitazioni</h2>
 
 + Il programma può crashare se il file non è stato compilato prima per verificare l'assenza di errori sintattici.
-+ **Lo sviluppo non è ancora completo.**
++ Potrebbe non funzionare bene con template complessi
 
 <h2>Autore</h2>
 
