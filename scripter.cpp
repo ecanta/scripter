@@ -949,15 +949,15 @@ int main()
 	}
 
 	// output lista delle macro
-	wofstream final_output("hierarchy.txt", ios::trunc);
-	if (!final_output.is_open())
+	wofstream output("hierarchy.txt", ios::trunc);
+	if (!output.is_open())
 	{
 		wcerr << L"Errore nell'apertura del secondo file per la scrittura.\n";
 		return 0;
 	}
 	for (const auto& macro : macros)
 	{
-		final_output << L"MACRO  " << macro << L'\n';
+		output << L"MACRO  " << macro << L'\n';
 	}
 
 	// tokenizzazione iniziale
@@ -1541,6 +1541,10 @@ int main()
 			}
 			Textlines.insert(Textlines.begin() + i + 1, NewLineToWrite);
 			Textlines[i].erase(pos);
+			if (Textlines[i].at(Textlines[i].size() - 1) == L' ')
+			{
+				Textlines[i].erase(Textlines[i].size() - 1);
+			}
 		}
 	}
 
@@ -1593,9 +1597,11 @@ int main()
 
 		// se la classe è derivata
 		long long DerivationIndex{ -1 };
-		for (size_t j = 0; j < Textlines[i].size() - 1; ++j)
+		for (size_t j = 1; j < Textlines[i].size() - 1; ++j)
 		{
-			if (Textlines[i].at(j) == L':' and Textlines[i].at(j + 1) != L':')
+			if (Textlines[i].at(j) == L':' and
+				Textlines[i].at(j + 1) != L':' and
+				Textlines[i].at(j - 1) != L':')
 			{
 				DerivationIndex = j;
 				break;
@@ -1642,97 +1648,185 @@ int main()
 		}
 	}
 
-	// traduzione riga per riga
-	int IndentationTabs{};
-	for (auto& Line : Textlines)
+	// rimozione delle cose vuote
+	for (long long i = Textlines.size() - 1; i >= 0; --i)
 	{
-		final_output << wstring(max(0, IndentationTabs), L'\t');
+		// calcolo della prima parola
+		long long FirstSpace{ -1 };
+		for (size_t j = 0; j < Textlines[i].size(); ++j)
+		{
+			if (!isalpha(Textlines[i].at(j)))
+			{
+				FirstSpace = j;
+			}
+		}
+		if (FirstSpace < 0)
+		{
+			continue;
+		}
+		auto Word{ Textlines[i].substr(0, FirstSpace) };
 
+		// controllo
+		if ((Word == L"class" or Word == L"struct" or Word == L"enum"
+			or Word == L"union" or Word == L"namespace") and
+			Textlines[i].find(L'{') == wstring::npos)
+		{
+			Textlines.erase(Textlines.begin() + i);
+		}
+	}
+
+	// traduzione riga per riga e output finale
+	wstring LastString;
+	output << L'\n';
+	int IndentationTabs{};
+	for (auto Line : Textlines)
+	{
 		// parentesi
 		if (Line == L"}")
 		{
-			final_output << L'\n';
+			output << L'\n';
 			IndentationTabs--;
+			LastString = L"}";
 			continue;
 		}
 
-		// namespace
-		if (Line.size() >= 9)
+		// variabile di un enum
+		long long space{ -1 };
+		for (size_t i = 0; i < Line.size(); ++i)
 		{
-			if (Line.substr(0, 9) == L"namespace")
+			if (!isalpha(Line.at(i)))
 			{
-				final_output << L"NAMESPACE  ";
-				Line.erase(0, 9);
-				if (Line.at(0) == L' ')
-				{
-					Line.erase(0, 1);
-				}
-
-				auto FirstSpace{ Line.find(L' ') };
-				if (FirstSpace != wstring::npos)
-				{
-					Line.erase(FirstSpace);
-				}
-
-				final_output << Line << L":\n";
-				IndentationTabs++;
-				continue;
+				space = i;
+				break;
 			}
 		}
+		if (space < 0)
+		{
+			output << wstring(IndentationTabs, L'\t');
+			output << L"ENUM_VAR  " << Line << L'\n';
+			LastString = Line;
+			continue;
+		}
+		auto Word{ Line.substr(0, space) };
 
 		// enum
-		if (Line.size() >= 4)
+		if (Word == L"enum")
 		{
-			if (Line.substr(0, 4) == L"enum")
+			if (LastString != L"}")
 			{
-				final_output << L"ENUM ";
-				Line.erase(0, 4);
-				if (Line.at(0) == L' ')
-				{
-					Line.erase(0, 1);
-				}
+				output << L'\n';
+			}
+			output << wstring(IndentationTabs, L'\t') << L"ENUM ";
+			Line.erase(0, Word.size());
+			if (Line.at(0) == L' ')
+			{
+				Line.erase(0, 1);
+			}
 
-				// enum class
-				if (Line.size() >= 5)
+			// enum class
+			if (Line.size() >= 5)
+			{
+				if (Line.substr(0, 5) == L"class")
 				{
-					if (Line.substr(0, 5) == L"class")
+					output << L"CLASS  ";
+					Line.erase(0, 5);
+					if (Line.at(0) == L' ')
 					{
-						final_output << L"CLASS  ";
-						Line.erase(0, 5);
-						if (Line.at(0) == L' ')
-						{
-							Line.erase(0, 1);
-						}
-					}
-					else
-					{
-						final_output << L' ';
+						Line.erase(0, 1);
 					}
 				}
 				else
 				{
-					final_output << L' ';
+					output << L' ';
 				}
-
-				auto FirstSpace{ Line.find(L' ') };
-				if (FirstSpace != wstring::npos)
-				{
-					Line.erase(FirstSpace);
-				}
-
-				final_output << Line << L":\n";
-				IndentationTabs++;
-				continue;
 			}
-		}
-	}
+			else
+			{
+				output << L' ';
+			}
 
-	// output righe (questa parte serve solo per il debug)
-	final_output << L"\n@@@@@\n@@@@@\n@@@@@\n\n\n";
-	for (const auto& Line : Textlines)
-	{
-		final_output << Line << L'\n';
+			auto FirstSpace{ Line.find(L' ') };
+			if (FirstSpace != wstring::npos)
+			{
+				Line.erase(FirstSpace);
+			}
+
+			output << Line << L":\n";
+			IndentationTabs++;
+			LastString = Line;
+			continue;
+		}
+
+		// varie cose
+		if (Word == L"class" or Word == L"struct" or
+			Word == L"enum" or Word == L"namespace")
+		{
+			// output tipo
+			auto Uppercase{ Word };
+			for (auto& ch : Uppercase)
+			{
+				ch = toupper(ch);
+			}
+
+			if (LastString != L"}")
+			{
+				output << L'\n';
+			}
+			output << wstring(IndentationTabs, L'\t');
+			output << Uppercase << L"  ";
+
+			// eliminazione primo spazio
+			Line.erase(0, Word.size());
+			if (Line.at(0) == L' ')
+			{
+				Line.erase(0, 1);
+			}
+
+			// eliminazione spazzature
+			size_t FirstSpace{ wstring::npos };
+			for (size_t i = 1; i < Line.size() - 1; ++i)
+			{
+				if (Line.at(i) == L':' and
+					Line.at(i + 1) != L':' and
+					Line.at(i - 1) != L':')
+				{
+					FirstSpace = i;
+					break;
+				}
+			}
+			if (FirstSpace == wstring::npos)
+			{
+				FirstSpace = Line.find(L'{');
+			}
+			Line.erase(FirstSpace);
+
+			// eliminazione ultimo spazio
+			if (Line.at(Line.size() - 1) == L' ')
+			{
+				Line.erase(Line.size() - 1);
+			}
+
+			// output nome
+			output << Line << L":\n";
+			IndentationTabs++;
+			LastString = Line;
+			continue;
+		}
+
+		// funzione
+		if (Line.find(L'(') != wstring::npos)
+		{
+			Line.erase(Line.find(L')') + 1);
+			output << wstring(IndentationTabs, L'\t');
+			output << L"FUNCT  " << Line << L'\n';
+			LastString = Line;
+			continue;
+		}
+
+		// variabile globale
+		output << wstring(IndentationTabs, L'\t') << L"VAR  " << Line << L'\n';
+		LastString = Line;
 	}
-	final_output.close();
+	output.close();
 	return 0;
 }
